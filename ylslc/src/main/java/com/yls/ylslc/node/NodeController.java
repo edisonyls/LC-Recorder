@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("api/node")
-@CrossOrigin(origins = { "https://ylslc.org", "http://localhost:3000" })
+@CrossOrigin(origins = { "https://ylslc.edisonyls.com", "http://localhost:3000" })
 public class NodeController {
     private final NodeService nodeService;
     private final Mapper<NodeEntity, NodeDto> nodeMapper;

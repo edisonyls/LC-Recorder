@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping(path = "api/data-structure")
-@CrossOrigin(origins = { "https://ylslc.org", "http://localhost:3000" })
+@CrossOrigin(origins = { "https://ylslc.edisonyls.com", "http://localhost:3000" })
 public class DataStructureController {
     private final DataStructureService dataStructureService;
     private final Mapper<DataStructureEntity, DataStructureDto> dataStructureMapper;
