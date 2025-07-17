@@ -43,8 +43,8 @@ function App() {
                   />
                   <Route path="/profile" Component={ProfilePage} exact />
                   <Route path="/upgrade" Component={UpgradePage} exact />
+                  <Route path="/dashboard" Component={Dashboard} exact />
                   <Route Component={PremiumRoute} exact>
-                    <Route path="/dashboard" Component={Dashboard} exact />
                     <Route Component={PremiumPlusRoute} exact>
                       <Route
                         path="/algorithm"
