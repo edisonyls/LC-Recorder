@@ -15,9 +15,9 @@ jobs:
       - name: Deploy to Frontend VM
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.VM_HOST }}
+          host: ${{ secrets.CLIENT_HOST }}
           username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.REACT_VM_SSH_KEY }}
+          password: ${{ secrets.CLIENT_HOST_PASSWORD }} # Add this line
           port: 2222
           script: |
             cd /home/edisonyls/LeetCodeRecorder/client
