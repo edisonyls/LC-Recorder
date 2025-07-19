@@ -1,68 +1,195 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
-import { useSpring, animated } from "react-spring";
-import dayjs from "dayjs";
+import { Box, Typography, useTheme } from "@mui/material";
+import { motion } from "framer-motion";
 
 const Welcome = ({ user }) => {
-  const props = useSpring({
-    opacity: 1,
-    from: { opacity: 0 },
-    marginTop: "5rem",
-    delay: 500,
-  });
+  const theme = useTheme();
 
-  // Calculate the number of days since the user joined
-  const today = dayjs();
-  const userCreatedAt = user?.createdAt ? dayjs(user.createdAt) : null;
-  const daysWithUs = userCreatedAt ? today.diff(userCreatedAt, "day") : 0;
+  const getTimeOfDayGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 6 || hour > 23) return "// Night Owl Mode";
+    if (hour < 12) return "// Good Morning";
+    if (hour < 18) return "// Good Afternoon";
+    return "// Good Evening";
+  };
 
-  // Animated number for daysWithUs
-  const daysWithUsProps = useSpring({
-    number: daysWithUs,
-    from: { number: 0 },
-  });
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  const textVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: (i) => ({
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.5,
+        delay: i * 0.1,
+        ease: "easeOut",
+      },
+    }),
+  };
 
   return (
     <Box
+      component={motion.div}
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "start",
-        alignItems: "start",
-        marginLeft: "10%",
-        marginRight: "10%",
-        marginTop: -6,
+        background: theme.palette.background.paper,
+        borderRadius: 1,
+        p: 4,
+        mb: 4,
+        position: "relative",
+        overflow: "hidden",
+        border: `1px solid ${theme.palette.divider}`,
       }}
     >
-      <animated.div style={props}>
+      <Box sx={{ position: "relative", zIndex: 1 }}>
         <Typography
-          variant="h4"
+          component={motion.div}
+          custom={0}
+          variants={textVariants}
+          initial="hidden"
+          animate="visible"
+          variant="h3"
           sx={{
-            marginBottom: 1,
-            color: "#00FF00",
-            textShadow: "0 0 8px #00FF00",
+            fontWeight: 400,
+            mb: 2,
+            color: theme.palette.text.secondary,
+            fontFamily: theme.typography.monoFamily,
           }}
         >
-          Welcome, {user?.firstName} {user?.lastName}!
+          {getTimeOfDayGreeting()}
         </Typography>
-        {userCreatedAt && (
-          <Typography variant="body1" sx={{ color: "#fff" }}>
-            You have been with us for{" "}
-            <animated.span
-              style={{
-                padding: "2px 5px",
-                borderRadius: "5px",
-                backgroundColor: "limegreen",
-                color: "black",
-                display: "inline-block",
+
+        <Typography
+          component={motion.div}
+          custom={1}
+          variants={textVariants}
+          initial="hidden"
+          animate="visible"
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            mb: 3,
+            color: theme.palette.text.primary,
+            fontFamily: theme.typography.monoFamily,
+          }}
+        >
+          user.{user.firstName?.toLowerCase()}.{user.lastName?.toLowerCase()}
+        </Typography>
+
+        <Typography
+          component={motion.div}
+          custom={2}
+          variants={textVariants}
+          initial="hidden"
+          animate="visible"
+          variant="body1"
+          sx={{
+            color: theme.palette.text.secondary,
+            maxWidth: 600,
+            lineHeight: 1.8,
+            fontFamily: theme.typography.monoFamily,
+          }}
+        >
+          {"// Welcome back to your coding journey tracker"}
+          <br />
+          {
+            "// Keep pushing forward, every problem solved is a step closer to mastery"
+          }
+          <br />
+          {"// Your dedication today shapes your expertise tomorrow"}
+        </Typography>
+
+        <Box
+          component={motion.div}
+          custom={3}
+          variants={textVariants}
+          initial="hidden"
+          animate="visible"
+          sx={{
+            mt: 4,
+            display: "flex",
+            gap: 3,
+            flexWrap: "wrap",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="caption"
+              sx={{
+                color: theme.palette.text.disabled,
+                fontFamily: theme.typography.monoFamily,
               }}
             >
-              {daysWithUsProps.number.to((n) => Math.floor(n))}
-            </animated.span>{" "}
-            days.
-          </Typography>
-        )}
-      </animated.div>
+              current_streak
+            </Typography>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 700,
+                color: theme.palette.text.primary,
+                fontFamily: theme.typography.monoFamily,
+              }}
+            >
+              0 days
+            </Typography>
+          </Box>
+          <Box>
+            <Typography
+              variant="caption"
+              sx={{
+                color: theme.palette.text.disabled,
+                fontFamily: theme.typography.monoFamily,
+              }}
+            >
+              total_problems
+            </Typography>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 700,
+                color: theme.palette.text.primary,
+                fontFamily: theme.typography.monoFamily,
+              }}
+            >
+              0
+            </Typography>
+          </Box>
+          <Box>
+            <Typography
+              variant="caption"
+              sx={{
+                color: theme.palette.text.disabled,
+                fontFamily: theme.typography.monoFamily,
+              }}
+            >
+              success_rate
+            </Typography>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 700,
+                color: theme.palette.text.primary,
+                fontFamily: theme.typography.monoFamily,
+              }}
+            >
+              0%
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
     </Box>
   );
 };

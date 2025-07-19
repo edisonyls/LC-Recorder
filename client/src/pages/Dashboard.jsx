@@ -1,4 +1,11 @@
-import { Box, CircularProgress, Typography, Button, Card, CardContent } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+} from "@mui/material";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthenticatedNavbar from "../components/navbar/AuthenticatedNavbar";
@@ -55,6 +62,7 @@ const Dashboard = () => {
             flexDirection: "column",
             backgroundColor: "#121212",
             mt: -4,
+            mb: 4,
             justifyContent: "center",
             alignItems: "center",
             px: 4,
@@ -70,15 +78,22 @@ const Dashboard = () => {
             }}
           >
             <CardContent sx={{ textAlign: "center" }}>
-              <Typography variant="h4" sx={{ color: grey[50], mb: 2, fontWeight: "bold" }}>
+              <Typography
+                variant="h4"
+                sx={{ color: grey[50], mb: 2, fontWeight: "bold" }}
+              >
                 🚀 Unlock Your Dashboard
               </Typography>
               <Typography variant="h6" sx={{ color: "#B9F2FF", mb: 3 }}>
                 Premium Features Await!
               </Typography>
-              <Typography variant="body1" sx={{ color: grey[300], mb: 4, lineHeight: 1.6 }}>
-                Access comprehensive analytics, detailed statistics, and advanced tracking features 
-                with our Premium or Premium Plus plans. Take your coding journey to the next level!
+              <Typography
+                variant="body1"
+                sx={{ color: grey[300], mb: 4, lineHeight: 1.6 }}
+              >
+                Access comprehensive analytics, detailed statistics, and
+                advanced tracking features with our Premium or Premium Plus
+                plans. Take your coding journey to the next level!
               </Typography>
               <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
                 <Button
@@ -126,16 +141,16 @@ const Dashboard = () => {
           mt: -4,
         }}
       >
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 6 }}>
           <Welcome user={user} />
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              marginLeft: "10%",
-              marginRight: "10%",
-              width: "80%",
+              marginLeft: "5%",
+              marginRight: "5%",
+              width: "90%",
             }}
           >
             <LeetCodeStats userId={user.id} />
