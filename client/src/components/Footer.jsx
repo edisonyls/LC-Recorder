@@ -1,116 +1,163 @@
 import React from "react";
-import { styled } from "@mui/material/styles";
-import { Box, Typography, IconButton } from "@mui/material";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import {
+  Box,
+  Container,
+  Typography,
+  Link,
+  IconButton,
+  useTheme,
+} from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
 
 const Footer = () => {
-  const handleIconClick = (url) => {
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
+  const theme = useTheme();
+  const currentYear = new Date().getFullYear();
+
+  const socialLinks = [
+    {
+      icon: <GitHubIcon />,
+      url: "https://github.com/edisonyls",
+      label: "GitHub",
+    },
+    {
+      icon: <LinkedInIcon />,
+      url: "https://www.linkedin.com/in/edison-yang-152aa01b8/",
+      label: "LinkedIn",
+    },
+  ];
 
   return (
-    <FooterContainer>
-      <SocialMediaBox>
-        <SocialMediaWrap>
-          <Box sx={{ width: "200px" }}></Box>
-          <Typography
+    <Box
+      component="footer"
+      sx={{
+        backgroundColor: theme.palette.background.paper,
+        borderTop: `1px solid ${theme.palette.divider}`,
+        py: 3,
+        mt: "auto",
+        pt: 4,
+      }}
+    >
+      <Container maxWidth="lg">
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          {/* Brand Section */}
+          <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                mb: 0.5,
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
+              LeetCode Recorder
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              © {currentYear} LeetCode Recorder. All rights reserved.
+            </Typography>
+          </Box>
+
+          {/* Links Section */}
+          <Box
             sx={{
-              fontSize: "18px",
-              color: "#fff",
-              textAlign: "center",
-              flexGrow: 0,
-              mx: "auto",
+              display: "flex",
+              gap: 2,
+              flexWrap: "wrap",
+              justifyContent: "center",
             }}
           >
-            YLSLC © {new Date().getFullYear()}
-          </Typography>
-
-          <Box
-            sx={{ display: "flex", justifyContent: "flex-end", width: "200px" }}
-          >
-            <SocialIcon>
-              <IconButton
-                sx={{
-                  color: "#fff",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  },
-                }}
-                onClick={() =>
-                  handleIconClick("https://www.instagram.com/leesianyong/")
-                }
-              >
-                <InstagramIcon />
-              </IconButton>
-              <IconButton
-                sx={{
-                  color: "#fff",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  },
-                }}
-                onClick={() =>
-                  handleIconClick(
-                    "https://www.linkedin.com/in/lishun-yang-152aa01b8/"
-                  )
-                }
-              >
-                <LinkedInIcon />
-              </IconButton>
-              <IconButton
-                sx={{
-                  color: "#fff",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  },
-                }}
-                onClick={() => handleIconClick("https://github.com/edisonyls")}
-              >
-                <GitHubIcon />
-              </IconButton>
-            </SocialIcon>
+            <Link
+              href="/about"
+              color="text.secondary"
+              underline="hover"
+              sx={{
+                transition: "color 0.2s",
+                "&:hover": {
+                  color: theme.palette.primary.main,
+                },
+              }}
+            >
+              About
+            </Link>
+            <Link
+              href="/privacy"
+              color="text.secondary"
+              underline="hover"
+              sx={{
+                transition: "color 0.2s",
+                "&:hover": {
+                  color: theme.palette.primary.main,
+                },
+              }}
+            >
+              Privacy
+            </Link>
+            <Link
+              href="/terms"
+              color="text.secondary"
+              underline="hover"
+              sx={{
+                transition: "color 0.2s",
+                "&:hover": {
+                  color: theme.palette.primary.main,
+                },
+              }}
+            >
+              Terms
+            </Link>
+            <Link
+              href="/contact"
+              color="text.secondary"
+              underline="hover"
+              sx={{
+                transition: "color 0.2s",
+                "&:hover": {
+                  color: theme.palette.primary.main,
+                },
+              }}
+            >
+              Contact
+            </Link>
           </Box>
-        </SocialMediaWrap>
-      </SocialMediaBox>
-    </FooterContainer>
+
+          {/* Social Links */}
+          <Box sx={{ display: "flex", gap: 0.5 }}>
+            {socialLinks.map((social) => (
+              <IconButton
+                key={social.label}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.label}
+                size="small"
+                sx={{
+                  color: theme.palette.text.secondary,
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    color: theme.palette.primary.main,
+                    transform: "translateY(-2px)",
+                  },
+                }}
+              >
+                {social.icon}
+              </IconButton>
+            ))}
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   );
 };
-
-const FooterContainer = styled(Box)(({ theme }) => ({
-  backgroundColor: "black",
-  paddingTop: "10px",
-  paddingBottom: "10px",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-  alignItems: "center",
-  height: "3vh",
-}));
-
-const SocialMediaBox = styled(Box)(({ theme }) => ({
-  maxWidth: "1000px",
-  width: "100%",
-}));
-
-const SocialMediaWrap = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  width: "100%",
-  margin: "4px auto 0 auto",
-  [theme.breakpoints.down("md")]: {
-    flexDirection: "column",
-    alignItems: "center",
-  },
-}));
-
-const SocialIcon = styled(Box)(({ theme }) => ({
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  width: "200px",
-}));
 
 export default Footer;
