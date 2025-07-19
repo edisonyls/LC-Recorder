@@ -20,7 +20,7 @@ jobs:
           password: ${{ secrets.CLIENT_HOST_PASSWORD }}
           port: 2222
           script: |
-            cd /home/edisonyls/LeetCodeRecorder/client
+            sudo cd /root/LeetCodeRecorder/client
             git pull --no-rebase
             npm install
             npm run build
