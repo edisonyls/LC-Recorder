@@ -29,7 +29,7 @@ jobs:
             export JWT_SECRET="${{ secrets.JWT_SECRET }}"
             export UPGRADE_SECRET_KEY="${{ secrets.UPGRADE_SECRET_KEY }}"
 
-            cd LeetCodeRecorder
+            cd /home/edisonyls/LeetCodeRecorder
             git pull
             cd ylslc
             ./mvnw clean package
