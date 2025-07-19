@@ -15,7 +15,7 @@ jobs:
       - name: Deploy to Frontend VM
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.CLIENT_HOST }}
+          host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           password: ${{ secrets.CLIENT_HOST_PASSWORD }} # Add this line
           port: 2222
