@@ -20,12 +20,18 @@ import CalendarHeatmap from "react-calendar-heatmap";
 import "react-calendar-heatmap/dist/styles.css";
 import ReactTooltip from "react-tooltip";
 
-const LeetCodeStats = ({ userId }) => {
+const LeetCodeStats = ({ userId, stats: propsStats }) => {
   const theme = useTheme();
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(propsStats);
+  const [loading, setLoading] = useState(!propsStats);
 
   useEffect(() => {
+    if (propsStats) {
+      setStats(propsStats);
+      setLoading(false);
+      return;
+    }
+
     const fetchStats = async () => {
       try {
         const response = await axiosInstance.get(`/question/stats/${userId}`);
@@ -41,7 +47,7 @@ const LeetCodeStats = ({ userId }) => {
     if (userId) {
       fetchStats();
     }
-  }, [userId]);
+  }, [userId, propsStats]);
 
   if (loading) {
     return (
@@ -104,11 +110,39 @@ const LeetCodeStats = ({ userId }) => {
     totalProblems > 0 ? (solvedProblems / totalProblems) * 100 : 0;
 
   // Calculate average time across all difficulties
-  const avgTime =
-    stats.averageTimeOfCompletion?.reduce(
-      (sum, item) => sum + (item.averageTime || 0),
-      0
-    ) / (stats.averageTimeOfCompletion?.length || 1) || 0;
+  const avgTime = (() => {
+    if (
+      !stats.averageTimeOfCompletion ||
+      stats.averageTimeOfCompletion.length === 0
+    ) {
+      return 0;
+    }
+
+    const difficultyCounts = stats.difficultyDistribution || [];
+
+    let totalTimeMinutes = 0;
+    let totalProblems = 0;
+
+    stats.averageTimeOfCompletion.forEach((item) => {
+      const difficultyCount =
+        difficultyCounts.find((d) => d.difficulty === item.difficulty)?.count ||
+        0;
+
+      // Convert time from "MM:SS" format to minutes
+      let timeInMinutes = 0;
+      if (item.averageTime && typeof item.averageTime === "string") {
+        const [minutes, seconds] = item.averageTime.split(":").map(Number);
+        timeInMinutes = minutes + seconds / 60;
+      } else if (typeof item.averageTime === "number") {
+        timeInMinutes = item.averageTime;
+      }
+
+      totalTimeMinutes += timeInMinutes * difficultyCount;
+      totalProblems += difficultyCount;
+    });
+
+    return totalProblems > 0 ? totalTimeMinutes / totalProblems : 0;
+  })();
 
   const StatCard = ({ icon, title, value, subtitle, color }) => (
     <Card
@@ -182,7 +216,7 @@ const LeetCodeStats = ({ userId }) => {
             title="Total Problems"
             value={totalProblems}
             subtitle="All time"
-            color="{theme.palette.primary.main}"
+            color={theme.palette.primary.main}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -394,9 +428,22 @@ const LeetCodeStats = ({ userId }) => {
                   series={[
                     {
                       name: "Average Time",
-                      data: stats.averageTimeOfCompletion.map((item) =>
-                        Math.round(item.averageTime)
-                      ),
+                      data: stats.averageTimeOfCompletion.map((item) => {
+                        // Convert time from "MM:SS" format to minutes
+                        let timeInMinutes = 0;
+                        if (
+                          item.averageTime &&
+                          typeof item.averageTime === "string"
+                        ) {
+                          const [minutes, seconds] = item.averageTime
+                            .split(":")
+                            .map(Number);
+                          timeInMinutes = minutes + seconds / 60;
+                        } else if (typeof item.averageTime === "number") {
+                          timeInMinutes = item.averageTime;
+                        }
+                        return Math.round(timeInMinutes);
+                      }),
                     },
                   ]}
                   type="bar"

@@ -2,8 +2,9 @@ import React from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { motion } from "framer-motion";
 
-const Welcome = ({ user }) => {
+const Welcome = ({ user, stats }) => {
   const theme = useTheme();
+  const { currentStreak = 0, totalProblems = 0, successRate = 0 } = stats || {};
 
   const getTimeOfDayGreeting = () => {
     const hour = new Date().getHours();
@@ -103,13 +104,13 @@ const Welcome = ({ user }) => {
             fontFamily: theme.typography.monoFamily,
           }}
         >
-          {"// Welcome back to your coding journey tracker"}
+          {"Welcome back to your coding journey tracker"}
           <br />
           {
-            "// Keep pushing forward, every problem solved is a step closer to mastery"
+            "Keep pushing forward, every problem solved is a step closer to mastery"
           }
           <br />
-          {"// Your dedication today shapes your expertise tomorrow"}
+          {"Your dedication today shapes your expertise tomorrow"}
         </Typography>
 
         <Box
@@ -129,11 +130,12 @@ const Welcome = ({ user }) => {
             <Typography
               variant="caption"
               sx={{
-                color: theme.palette.text.disabled,
+                color: theme.palette.text.secondary,
                 fontFamily: theme.typography.monoFamily,
+                fontSize: "12px",
               }}
             >
-              current_streak
+              🔥 current_streak
             </Typography>
             <Typography
               variant="h5"
@@ -141,20 +143,22 @@ const Welcome = ({ user }) => {
                 fontWeight: 700,
                 color: theme.palette.text.primary,
                 fontFamily: theme.typography.monoFamily,
+                textAlign: "center",
               }}
             >
-              0 days
+              {currentStreak} days
             </Typography>
           </Box>
           <Box>
             <Typography
               variant="caption"
               sx={{
-                color: theme.palette.text.disabled,
+                color: theme.palette.text.secondary,
                 fontFamily: theme.typography.monoFamily,
+                fontSize: "12px",
               }}
             >
-              total_problems
+              📊 total_problems
             </Typography>
             <Typography
               variant="h5"
@@ -162,20 +166,22 @@ const Welcome = ({ user }) => {
                 fontWeight: 700,
                 color: theme.palette.text.primary,
                 fontFamily: theme.typography.monoFamily,
+                textAlign: "center",
               }}
             >
-              0
+              {totalProblems}
             </Typography>
           </Box>
           <Box>
             <Typography
               variant="caption"
               sx={{
-                color: theme.palette.text.disabled,
+                color: theme.palette.text.secondary,
                 fontFamily: theme.typography.monoFamily,
+                fontSize: "12px",
               }}
             >
-              success_rate
+              🎯 success_rate
             </Typography>
             <Typography
               variant="h5"
@@ -183,9 +189,10 @@ const Welcome = ({ user }) => {
                 fontWeight: 700,
                 color: theme.palette.text.primary,
                 fontFamily: theme.typography.monoFamily,
+                textAlign: "center",
               }}
             >
-              0%
+              {successRate.toFixed(1)}%
             </Typography>
           </Box>
         </Box>

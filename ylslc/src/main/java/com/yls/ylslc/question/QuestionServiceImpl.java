@@ -111,7 +111,6 @@ public class QuestionServiceImpl implements QuestionService {
         }).orElseThrow(() -> new RuntimeException("Question not found"));
     }
 
-
     @Override
     public byte[] getImage(Integer questionNumber, String imageId) {
         try {
