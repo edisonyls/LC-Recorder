@@ -5,7 +5,7 @@ on:
     branches:
       - develop
     paths:
-      - "server/**"
+      - "ylslc/**"
       - ".github/workflows/server-deploy.yml"
 
 jobs:
