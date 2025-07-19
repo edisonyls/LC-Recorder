@@ -15,25 +15,23 @@ const Welcome = ({ user, stats }) => {
   };
 
   const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      y: 0,
       transition: {
-        duration: 0.6,
+        duration: 0.3,
         ease: "easeOut",
       },
     },
   };
 
   const textVariants = {
-    hidden: { opacity: 0, x: -20 },
+    hidden: { opacity: 0 },
     visible: (i) => ({
       opacity: 1,
-      x: 0,
       transition: {
-        duration: 0.5,
-        delay: i * 0.1,
+        duration: 0.2,
+        delay: i * 0.05,
         ease: "easeOut",
       },
     }),
@@ -42,6 +40,7 @@ const Welcome = ({ user, stats }) => {
   return (
     <Box
       component={motion.div}
+      layoutId="welcome-container"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -53,6 +52,7 @@ const Welcome = ({ user, stats }) => {
         position: "relative",
         overflow: "hidden",
         border: `1px solid ${theme.palette.divider}`,
+        width: "100%",
       }}
     >
       <Box sx={{ position: "relative", zIndex: 1 }}>

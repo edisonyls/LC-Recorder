@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, IconButton, Typography } from "@mui/material";
-import { useSpring, animated } from "react-spring";
+import { Box, IconButton, Typography, Card, CardContent } from "@mui/material";
 import { axiosInstance } from "../../config/axiosConfig";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
@@ -23,63 +22,65 @@ const DataStructureStats = ({ userId }) => {
     fetchData();
   }, [userId]);
 
-  const props = useSpring({
-    opacity: 1,
-    from: { opacity: 0 },
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-    padding: "16px",
-    textAlign: "center",
-    boxSizing: "border-box",
-    margin: "10px",
-    delay: 1500,
-    width: "48%",
-  });
-
   return (
-    <animated.div style={props}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          color: "white",
-        }}
-      >
-        <Box sx={{ flexGrow: 1, textAlign: "center" }}>
-          <Typography variant="h5">Data Structure Stats</Typography>
-        </Box>
-        <IconButton
+    <Card
+      sx={{
+        width: "100%",
+        minHeight: "140px",
+        backgroundColor: "rgba(255, 255, 255, 0.05)",
+        border: "1px solid rgba(255, 255, 255, 0.1)",
+        transition: "all 0.3s ease",
+        "&:hover": {
+          backgroundColor: "rgba(255, 255, 255, 0.08)",
+          borderColor: "rgba(255, 255, 255, 0.2)",
+        },
+      }}
+    >
+      <CardContent>
+        <Box
           sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
             color: "white",
-            "&:hover": {
-              backgroundColor: "white",
-              color: "black",
-            },
-            fontSize: "1.8rem",
+            mb: 2,
           }}
-          onClick={() => navigate("/data-structure")}
         >
-          <ArrowForwardIcon sx={{ fontSize: "inherit" }} />
-        </IconButton>
-      </Box>
-      <Box sx={{ textAlign: "left" }}>
-        <Typography variant="body1" sx={{ color: "cyan" }}>
-          Total Data Structure You Have Recorded:{" "}
-          <span
-            style={{
-              padding: "2px 5px",
-              borderRadius: "5px",
-              backgroundColor: "limegreen",
-              color: "black",
-              display: "inline-block",
+          <Box sx={{ flexGrow: 1, textAlign: "center" }}>
+            <Typography variant="h5">Data Structure Stats</Typography>
+          </Box>
+          <IconButton
+            sx={{
+              color: "white",
+              "&:hover": {
+                backgroundColor: "white",
+                color: "black",
+              },
+              fontSize: "1.8rem",
             }}
+            onClick={() => navigate("/data-structure")}
           >
-            {dataStructureNumber}
-          </span>
-        </Typography>
-      </Box>
-    </animated.div>
+            <ArrowForwardIcon sx={{ fontSize: "inherit" }} />
+          </IconButton>
+        </Box>
+        <Box sx={{ textAlign: "left" }}>
+          <Typography variant="body1" sx={{ color: "cyan" }}>
+            Total Data Structure You Have Recorded:{" "}
+            <span
+              style={{
+                padding: "2px 5px",
+                borderRadius: "5px",
+                backgroundColor: "limegreen",
+                color: "black",
+                display: "inline-block",
+              }}
+            >
+              {dataStructureNumber}
+            </span>
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
   );
 };
 

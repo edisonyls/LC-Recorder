@@ -61,10 +61,10 @@ const Footer = () => {
                 backgroundClip: "text",
               }}
             >
-              LeetCode Recorder
+              LC-Recorder
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              © {currentYear} LeetCode Recorder. All rights reserved.
+              © {currentYear} LC-Recorder. All rights reserved.
             </Typography>
           </Box>
 

@@ -44,7 +44,7 @@ const AuthenticatedNavbar = () => {
         sx={{
           backgroundColor: "black",
           borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-          mb: 4,
+          mb: 2,
         }}
       >
         <Toolbar sx={{ py: 1 }}>
@@ -55,7 +55,11 @@ const AuthenticatedNavbar = () => {
               flexGrow: 1,
               cursor: "pointer",
             }}
-            onClick={() => navigate("/dashboard")}
+            onClick={() => {
+              if (location.pathname !== "/dashboard") {
+                navigate("/dashboard");
+              }
+            }}
           >
             <Box
               component="img"
