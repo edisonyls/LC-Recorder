@@ -18,7 +18,7 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           password: ${{ secrets.CLIENT_HOST_PASSWORD }}
-          port: 2222
+          port: ${{ secrets.VM_CLIENT_PORT }}
           script: |
             cd /home/edisonyls/LeetCodeRecorder/client
             git pull --no-rebase

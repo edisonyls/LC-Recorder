@@ -22,7 +22,7 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           password: ${{ secrets.CLIENT_HOST_PASSWORD }}
-          port: 2223
+          port: ${{ secrets.VM_SERVER_PORT }}
           script: |
             export DATABASE_USERNAME="${{ secrets.DATABASE_USERNAME }}"
             export DATABASE_PASSWORD="${{ secrets.DATABASE_PASSWORD }}"
