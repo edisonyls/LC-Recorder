@@ -27,6 +27,8 @@ const NewQuestion = () => {
   return (
     <Box display="flex" flexDirection="column" minHeight="100vh">
       <AuthenticatedNavbar />
+      
+      {/* Header with Back button and Title */}
       <Box
         sx={{
           mt: 2,
@@ -38,34 +40,46 @@ const NewQuestion = () => {
           paddingRight: 2,
         }}
       >
-        <Box sx={{ position: "absolute", left: "8%" }}>
-          <WhiteBackgroundButton
-            icon={<ArrowBack />}
-            onClick={() => setDialogOpen(true)}
-            buttonText="Back"
-          />
-        </Box>
+        <WhiteBackgroundButton
+          icon={<ArrowBack />}
+          onClick={() => setDialogOpen(true)}
+          buttonText="Back"
+        />
 
         <Typography
-          sx={{ textAlign: "center", width: "100%" }}
           variant="h5"
-          gutterBottom
+          sx={{ 
+            textAlign: "center",
+            fontWeight: 600,
+          }}
         >
           {question === null ? "Upload New Question" : "Modify Question"}
         </Typography>
 
-        {withTimer && (
-          <Box sx={{ position: "absolute", right: "8%" }}>
-            <Stopwatch onTimeSubmit={handleTimeSubmit} />
-          </Box>
-        )}
+        <Box sx={{ width: "80px" }} /> {/* Spacer for balance */}
       </Box>
 
-      {question === null ? (
-        <NewQuestionForm timerValue={timeOfCompletion} />
-      ) : (
-        <UpdateQuestionForm initialQuestion={question} />
+      {/* Stopwatch - Prominently displayed at the top */}
+      {withTimer && (
+        <Box 
+          sx={{ 
+            display: "flex", 
+            justifyContent: "center", 
+            paddingX: 2,
+            marginBottom: 2,
+          }}
+        >
+          <Stopwatch onTimeSubmit={handleTimeSubmit} />
+        </Box>
       )}
+
+      <Box sx={{ mb: 4 }}>
+        {question === null ? (
+          <NewQuestionForm timerValue={timeOfCompletion} />
+        ) : (
+          <UpdateQuestionForm initialQuestion={question} />
+        )}
+      </Box>
 
       <Footer />
       <GenericDialog

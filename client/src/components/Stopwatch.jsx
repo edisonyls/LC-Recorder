@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { IconButton, Box, Typography, Tooltip } from "@mui/material";
+import { IconButton, Box, Typography, Tooltip, Paper, Chip } from "@mui/material";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ReplayIcon from "@mui/icons-material/Replay";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import TimerIcon from "@mui/icons-material/Timer";
 import { GenericDialog } from "./generic/GenericDialog";
 
 const MAX_TIME = 59999;
@@ -84,51 +85,94 @@ const Stopwatch = ({ onTimeSubmit }) => {
 
   return (
     <>
-      <Box
+      <Paper
+        elevation={2}
         sx={{
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
-          border: "1px solid #fff",
-          background: "#000",
-          padding: "8px",
-          borderRadius: "4px",
-          marginRight: "8px",
+          padding: "12px 16px",
+          borderRadius: "12px",
+          marginBottom: "16px",
+          backgroundColor: "background.paper",
+          border: (theme) => `1px solid ${theme.palette.divider}`,
+          gap: 2,
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            width: "100%",
-          }}
-        >
-          <Typography
-            variant="h7"
-            sx={{ marginRight: "8px", flexGrow: 1, color: "#fff" }}
-          >
-            Time Spent: {formatTime()}
+        <TimerIcon 
+          sx={{ 
+            color: isRunning ? "success.main" : "text.secondary",
+            fontSize: "1.2rem"
+          }} 
+        />
+        
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            Time:
           </Typography>
-          <Tooltip title="start/pause">
-            <IconButton sx={{ color: "#fff" }} onClick={handlePauseResume}>
-              {isRunning ? <PauseIcon /> : <PlayArrowIcon />}
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="reset">
-            <IconButton
-              sx={{ color: "#fff" }}
-              onClick={() => setOpenResetDialog(true)}
+          <Chip
+            label={formatTime()}
+            variant="outlined"
+            size="small"
+            sx={{
+              fontFamily: "monospace",
+              fontWeight: 600,
+              fontSize: "0.875rem",
+              backgroundColor: isRunning ? "success.light" : "background.default",
+              color: isRunning ? "success.dark" : "text.primary",
+              borderColor: isRunning ? "success.main" : "divider",
+            }}
+          />
+        </Box>
+
+        <Box sx={{ display: "flex", gap: 0.5, marginLeft: "auto" }}>
+          <Tooltip title={isRunning ? "Pause" : "Resume"}>
+            <IconButton 
+              size="small"
+              onClick={handlePauseResume}
+              sx={{
+                color: isRunning ? "warning.main" : "success.main",
+                "&:hover": {
+                  backgroundColor: isRunning ? "warning.light" : "success.light",
+                }
+              }}
             >
-              <ReplayIcon />
+              {isRunning ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
             </IconButton>
           </Tooltip>
-          <Tooltip title="finish">
-            <IconButton sx={{ color: "#fff" }} onClick={handleFinish}>
-              <CheckCircleOutlineIcon />
+          
+          <Tooltip title="Reset Timer">
+            <IconButton
+              size="small"
+              onClick={() => setOpenResetDialog(true)}
+              sx={{
+                color: "text.secondary",
+                "&:hover": {
+                  backgroundColor: "action.hover",
+                  color: "primary.main",
+                }
+              }}
+            >
+              <ReplayIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          
+          <Tooltip title="Finish & Submit Time">
+            <IconButton 
+              size="small"
+              onClick={handleFinish}
+              sx={{
+                color: "primary.main",
+                "&:hover": {
+                  backgroundColor: "primary.light",
+                  color: "primary.dark",
+                }
+              }}
+            >
+              <CheckCircleOutlineIcon fontSize="small" />
             </IconButton>
           </Tooltip>
         </Box>
-      </Box>
+      </Paper>
       <GenericDialog
         isOpen={openFinishDialog}
         onClose={() => setOpenFinishDialog(false)}

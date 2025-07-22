@@ -6,8 +6,11 @@ import {
   InputAdornment,
   IconButton,
   Paper,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
   WarningButton,
   WhiteBackgroundButton,
@@ -27,6 +30,21 @@ const Solution = ({
   showDeleteButton,
 }) => {
   const [showCodeInput, setShowCodeInput] = useState(codeSnippet !== "");
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleDeleteClick = () => {
+    deleteSolution();
+    handleMenuClose();
+  };
 
   const handleOnClick = () => {
     deleteCodeSnippet();
@@ -53,17 +71,59 @@ const Solution = ({
       <Box
         sx={{
           display: "flex",
-          justifyContent: "center",
+          justifyContent: "space-between",
           alignItems: "center",
           marginTop: 2,
+          marginBottom: 1,
         }}
       >
+        <Box sx={{ flex: 1 }} />
         <Typography variant="h6">Solution {solutionId}</Typography>
-        {showDeleteButton && (
-          <IconButton onClick={deleteSolution}>
-            <DeleteForeverIcon style={{ color: "black" }} />
-          </IconButton>
-        )}
+        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+          {showDeleteButton && (
+            <>
+              <IconButton 
+                onClick={handleMenuClick}
+                sx={{
+                  color: 'text.secondary',
+                  '&:hover': {
+                    backgroundColor: 'action.hover',
+                    color: 'text.primary',
+                  }
+                }}
+              >
+                <MoreVertIcon />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleMenuClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+              >
+                <MenuItem 
+                  onClick={handleDeleteClick}
+                  sx={{
+                    color: 'error.main',
+                    '&:hover': {
+                      backgroundColor: 'error.light',
+                      color: 'error.dark',
+                    }
+                  }}
+                >
+                  <DeleteForeverIcon sx={{ mr: 1, fontSize: '1.2rem' }} />
+                  Delete Solution
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+        </Box>
       </Box>
 
       <Typography
@@ -117,8 +177,19 @@ const Solution = ({
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={handleOnClick} edge="end">
-                      <DeleteForeverIcon style={{ color: "black" }} />
+                    <IconButton 
+                      onClick={handleOnClick} 
+                      edge="end"
+                      size="small"
+                      sx={{
+                        color: 'text.secondary',
+                        '&:hover': {
+                          backgroundColor: 'action.hover',
+                          color: 'error.main',
+                        }
+                      }}
+                    >
+                      <DeleteForeverIcon fontSize="small" />
                     </IconButton>
                   </InputAdornment>
                 ),

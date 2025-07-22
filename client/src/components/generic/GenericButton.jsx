@@ -266,6 +266,7 @@ export const WhiteBackgroundButtonWithInput = ({
   inputOnChange,
   ...props
 }) => {
+  const theme = useTheme();
   const inputRef = React.useRef(null);
   const handleButtonClick = () => {
     if (inputRef.current) {
@@ -280,12 +281,13 @@ export const WhiteBackgroundButtonWithInput = ({
         minWidth: "120px",
         height: "40px",
         borderRadius: "20px",
-        borderColor: "black",
-        color: "black",
+        borderColor: theme.palette.primary.main,
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
         "&:hover": {
-          borderColor: "black",
-          backgroundColor: "rgba(1, 1, 1, 1)",
-          color: "white",
+          borderColor: theme.palette.primary.dark,
+          backgroundColor: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText,
         },
         ...props.sx,
       }}
@@ -316,12 +318,16 @@ export const GreyBackgroundButton = ({ buttonText, icon, ...props }) => {
         minWidth: "120px",
         height: "40px",
         borderRadius: theme.shape.borderRadius,
-        borderColor: theme.palette.divider,
+        borderColor: theme.palette.primary.main,
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
+        fontWeight: 600,
         ml: 1,
         mr: 1,
         "&:hover": {
-          backgroundColor: theme.palette.action.hover,
-          color: theme.palette.text.primary,
+          backgroundColor: theme.palette.primary.main,
+          borderColor: theme.palette.primary.dark,
+          color: theme.palette.primary.contrastText,
         },
         ...props.sx,
       }}
@@ -357,12 +363,16 @@ export const GreyBackgroundButtonWithInput = ({
         minWidth: "120px",
         height: "40px",
         borderRadius: theme.shape.borderRadius,
-        borderColor: theme.palette.divider,
+        borderColor: theme.palette.primary.main,
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
+        fontWeight: 600,
         ml: 1,
         mr: 1,
         "&:hover": {
-          backgroundColor: theme.palette.action.hover,
-          color: theme.palette.text.primary,
+          backgroundColor: theme.palette.primary.main,
+          borderColor: theme.palette.primary.dark,
+          color: theme.palette.primary.contrastText,
         },
         ...props.sx,
       }}
@@ -400,17 +410,18 @@ export const LightGreyBackgroundButton = ({
         borderRadius: theme.shape.borderRadius,
         borderColor: selected
           ? theme.palette.primary.main
-          : theme.palette.divider,
+          : theme.palette.primary.main,
         backgroundColor: selected
-          ? theme.palette.action.selected
-          : "transparent",
-        color: selected
           ? theme.palette.primary.main
+          : theme.palette.background.paper,
+        color: selected
+          ? theme.palette.primary.contrastText
           : theme.palette.text.primary,
+        fontWeight: 600,
         "&:hover": {
-          borderColor: theme.palette.primary.main,
-          backgroundColor: theme.palette.action.hover,
-          color: theme.palette.primary.main,
+          borderColor: theme.palette.primary.dark,
+          backgroundColor: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText,
         },
         ...props.sx,
       }}
