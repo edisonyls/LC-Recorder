@@ -54,7 +54,7 @@ export const ProfileView = ({ user }) => {
           <Typography variant="h4" sx={{ fontWeight: "medium" }}>
             {user.firstName} {user.lastName}
           </Typography>
-          <UserBadge tier={user.role} />
+          <UserBadge role={user.role} />
         </Box>
         <Typography
           variant="subtitle2"
