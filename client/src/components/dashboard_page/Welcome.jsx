@@ -1,9 +1,12 @@
 import React from "react";
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme, Button } from "@mui/material";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import CodeIcon from "@mui/icons-material/Code";
 
 const Welcome = ({ user, stats }) => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const { currentStreak = 0, totalProblems = 0, successRate = 0 } = stats || {};
 
   const getTimeOfDayGreeting = () => {
@@ -195,6 +198,43 @@ const Welcome = ({ user, stats }) => {
               {successRate.toFixed(1)}%
             </Typography>
           </Box>
+        </Box>
+
+        <Box
+          component={motion.div}
+          custom={4}
+          variants={textVariants}
+          initial="hidden"
+          animate="visible"
+          sx={{
+            mt: 4,
+            display: "flex",
+            justifyContent: "flex-start",
+          }}
+        >
+          <Button
+            variant="contained"
+            startIcon={<CodeIcon />}
+            onClick={() => navigate("/table")}
+            sx={{
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.primary.contrastText,
+              fontFamily: theme.typography.monoFamily,
+              fontWeight: 600,
+              px: 3,
+              py: 1.5,
+              textTransform: "none",
+              borderRadius: 1,
+              "&:hover": {
+                backgroundColor: theme.palette.primary.dark,
+                transform: "translateY(-1px)",
+                boxShadow: theme.shadows[4],
+              },
+              transition: "all 0.2s ease-in-out",
+            }}
+          >
+            View Recorded Problems
+          </Button>
         </Box>
       </Box>
     </Box>
