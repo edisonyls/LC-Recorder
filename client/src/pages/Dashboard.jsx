@@ -287,17 +287,20 @@ const Dashboard = () => {
             }}
           >
             <LeetCodeStats userId={user.id} stats={stats} />
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                gap: 3,
-                width: "100%",
-              }}
-            >
-              <DataStructureStats userId={user.id} />
-              <AlgorithmStats />
-            </Box>
+            {/* Only show Data Structure and Algorithm Stats for PREPLUS and ADMIN users */}
+            {(user.role === "PREPLUS" || user.role === "ADMIN") && (
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                  gap: 3,
+                  width: "100%",
+                }}
+              >
+                <DataStructureStats userId={user.id} />
+                <AlgorithmStats />
+              </Box>
+            )}
           </Box>
         </Box>
       </Box>
