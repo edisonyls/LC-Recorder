@@ -1,15 +1,16 @@
 package com.yls.ylslc.question;
 
-import com.yls.ylslc.question.solution.SolutionService;
 import com.yls.ylslc.user.UserEntity;
 import com.yls.ylslc.user.UserService;
 import jakarta.transaction.Transactional;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,14 +23,11 @@ import java.util.*;
 public class QuestionServiceImpl implements QuestionService {
     private final QuestionRepository questionRepository;
     private final UserService userService;
-    private final SolutionService solutionService;
 
     public QuestionServiceImpl(QuestionRepository theQuestionRepository,
-            UserService theUserService,
-            SolutionService solutionService) {
+            UserService theUserService) {
         this.questionRepository = theQuestionRepository;
         this.userService = theUserService;
-        this.solutionService = solutionService;
     }
 
     public Page<QuestionEntity> searchQuestions(String searchQuery, Pageable pageable) {
@@ -106,9 +104,33 @@ public class QuestionServiceImpl implements QuestionService {
             Optional.ofNullable(questionEntity.getTimeOfCompletion()).ifPresent(existingQuestion::setTimeOfCompletion);
             Optional.ofNullable(questionEntity.getStar()).ifPresent(existingQuestion::setStar);
             Optional.ofNullable(questionEntity.getReasonOfFail()).ifPresent(existingQuestion::setReasonOfFail);
-            solutionService.updateSolutions(existingQuestion, questionEntity.getSolutions());
+            if (questionEntity.getSolutions() != null) {
+                existingQuestion.setSolutions(new ArrayList<>(questionEntity.getSolutions()));
+            }
+            
             return questionRepository.save(existingQuestion);
         }).orElseThrow(() -> new RuntimeException("Question not found"));
+    }
+
+    @Override
+    public String uploadImages(MultipartFile image, String questionNumber) {
+        String extension = FilenameUtils.getExtension(image.getOriginalFilename());
+        String uuid = UUID.randomUUID().toString();
+        String filename = uuid + "." + extension;
+        String rawUsername = userService.getCurrentUser().getUsername();
+        String username = rawUsername.replaceAll("[^a-zA-Z0-9_-]", "_");
+
+        String baseDir = System.getProperty("user.home") + "/ylslc_images/solution_images";
+        Path uploadDir = Paths.get(baseDir, username, questionNumber);
+        try {
+            Files.createDirectories(uploadDir);
+            Path filePath = uploadDir.resolve(filename);
+            image.transferTo(filePath.toFile());
+            return filename;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to save image", e);
+        }
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.yls.ylslc.question;
 
 import com.yls.ylslc.config.response.Response;
 import com.yls.ylslc.mappers.Mapper;
-import com.yls.ylslc.question.solution.SolutionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,14 +23,12 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = { "https://ylslc.edisonyls.com", "http://localhost:3000" })
 public class QuestionController {
     private final QuestionService questionService;
-    private final SolutionService solutionService;
     private final Mapper<QuestionEntity, QuestionDto> questionMapper;
 
     @Autowired
-    public QuestionController(QuestionService theQuestionService, SolutionService theSolutionService,
+    public QuestionController(QuestionService theQuestionService, 
             Mapper<QuestionEntity, QuestionDto> questionMapper) {
         this.questionService = theQuestionService;
-        this.solutionService = theSolutionService;
         this.questionMapper = questionMapper;
     }
 
@@ -79,7 +76,7 @@ public class QuestionController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "upload-image")
     public Response uploadImages(@RequestPart("image") MultipartFile image,
             @RequestPart("questionNumber") String questionNumber) {
-        String imageId = solutionService.uploadImages(image, questionNumber);
+        String imageId = questionService.uploadImages(image, questionNumber);
         return Response.ok(imageId, "Image saved successfully!");
     }
 

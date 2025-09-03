@@ -3,6 +3,8 @@ package com.yls.ylslc.question;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,6 +24,8 @@ public interface QuestionService {
     boolean isExist(UUID id);
 
     QuestionEntity partialUpdate(UUID id, QuestionEntity questionEntity);
+
+    String uploadImages(MultipartFile image, String questionNumber);
 
     byte[] getImage(Integer questionNumber, String imageId);
 
