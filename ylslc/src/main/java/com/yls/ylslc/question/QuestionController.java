@@ -100,8 +100,8 @@ public class QuestionController {
 
     @GetMapping("image/{questionId}/{imageId}")
     public ResponseEntity<byte[]> getQuestionImage(@PathVariable UUID questionId, @PathVariable String imageId) {
-        QuestionEntity questionEntity = questionService.getQuestionById(questionId);
-        byte[] imageData = questionService.getImage(questionEntity.getNumber(), imageId);
+        Integer questionNumber = questionService.getQuestionNumber(questionId);
+        byte[] imageData = questionService.getImage(questionNumber, imageId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(getMediaTypeForImageId(imageId));
@@ -121,8 +121,8 @@ public class QuestionController {
 
     @DeleteMapping("image/{questionId}/{imageId}")
     public void deleteQuestionImage(@PathVariable UUID questionId, @PathVariable String imageId) {
-        QuestionEntity questionEntity = questionService.getQuestionById(questionId);
-        questionService.deleteImage(questionEntity.getNumber(), imageId);
+        Integer questionNumber = questionService.getQuestionNumber(questionId);
+        questionService.deleteImage(questionNumber, imageId);
     }
 
     @PostMapping
@@ -136,9 +136,8 @@ public class QuestionController {
     @GetMapping(path = "/{id}")
     public Response getQuestion(@PathVariable("id") UUID id) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<QuestionEntity> foundQuestion = questionService.findOne(id, username);
-        return foundQuestion.map(questionEntity -> {
-            QuestionDto questionDto = questionMapper.mapTo(questionEntity);
+        Optional<QuestionDto> foundQuestion = questionService.findOne(id, username);
+        return foundQuestion.map(questionDto -> {
             return Response.ok(questionDto, "Question retrieved successfully!");
         }).orElse(
                 Response.failed(HttpStatus.NOT_FOUND, "Question doesn't exist"));
@@ -147,10 +146,9 @@ public class QuestionController {
     @DeleteMapping(path = "/{id}")
     public Response deleteQuestion(@PathVariable("id") UUID id) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<QuestionEntity> foundQuestion = questionService.findOne(id, username);
+        Optional<QuestionDto> foundQuestion = questionService.findOne(id, username);
 
-        return foundQuestion.map(questionEntity -> {
-            QuestionDto questionDto = questionMapper.mapTo(questionEntity);
+        return foundQuestion.map(questionDto -> {
             questionService.delete(id);
             return Response.ok(questionDto, "Question <" + questionDto.getTitle() + "> deleted successfully!");
         }).orElse(
@@ -160,8 +158,7 @@ public class QuestionController {
     @PutMapping("/{id}")
     public Response updateQuestion(@PathVariable UUID id, @RequestBody QuestionEntity questionEntity) {
         try {
-            QuestionEntity updatedEntity = questionService.partialUpdate(id, questionEntity);
-            QuestionDto updatedQuestion = questionMapper.mapTo(updatedEntity);
+            QuestionDto updatedQuestion = questionService.partialUpdate(id, questionEntity);
             return Response.ok(updatedQuestion, "Question updated successfully");
         } catch (RuntimeException e) {
             return Response.failed(HttpStatus.BAD_REQUEST, "Question update failed.", e.toString());
@@ -171,8 +168,7 @@ public class QuestionController {
     @PutMapping("/toggleStar/{id}")
     public Response toggleStar(@PathVariable UUID id) {
         try {
-            QuestionEntity question = questionService.updateStar(id);
-            QuestionDto updatedQuestion = questionMapper.mapTo(question);
+            QuestionDto updatedQuestion = questionService.updateStar(id);
             return Response.ok(updatedQuestion, "Star updated!");
         } catch (Exception e) {
             return Response.failed(HttpStatus.INTERNAL_SERVER_ERROR, "Star update failed", e.toString());

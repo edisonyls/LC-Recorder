@@ -65,8 +65,10 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public Optional<QuestionEntity> findOne(UUID id, String username) {
-        return questionRepository.findByIdAndUsername(id, username);
+    @Transactional
+    public Optional<QuestionDto> findOne(UUID id, String username) {
+        Optional<QuestionEntity> questionEntity = questionRepository.findByIdAndUsername(id, username);
+        return questionEntity.map(questionMapper::mapTo);
     }
 
     @Override
@@ -102,8 +104,8 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public QuestionEntity partialUpdate(UUID id, QuestionEntity questionEntity) {
-        return questionRepository.findById(id).map(existingQuestion -> {
+    public QuestionDto partialUpdate(UUID id, QuestionEntity questionEntity) {
+        QuestionEntity updatedEntity = questionRepository.findById(id).map(existingQuestion -> {
             Optional.ofNullable(questionEntity.getNumber()).ifPresent(existingQuestion::setNumber);
             Optional.ofNullable(questionEntity.getTitle()).ifPresent(existingQuestion::setTitle);
             Optional.ofNullable(questionEntity.getDifficulty()).ifPresent(existingQuestion::setDifficulty);
@@ -119,6 +121,8 @@ public class QuestionServiceImpl implements QuestionService {
             
             return questionRepository.save(existingQuestion);
         }).orElseThrow(() -> new RuntimeException("Question not found"));
+        
+        return questionMapper.mapTo(updatedEntity);
     }
 
     @Override
@@ -169,14 +173,17 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public QuestionEntity getQuestionById(UUID id) {
-        return questionRepository.findById(id)
+    @Transactional
+    public QuestionDto getQuestionById(UUID id) {
+        QuestionEntity questionEntity = questionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Question not found with id: " + id));
+        return questionMapper.mapTo(questionEntity);
     }
 
     @Override
-    public QuestionEntity updateStar(UUID id) {
-        return questionRepository.findById(id).map(question -> {
+    @Transactional
+    public QuestionDto updateStar(UUID id) {
+        QuestionEntity updatedEntity = questionRepository.findById(id).map(question -> {
             Boolean currentStar = question.getStar();
             if (currentStar == null) {
                 question.setStar(true);
@@ -185,6 +192,15 @@ public class QuestionServiceImpl implements QuestionService {
             }
             return questionRepository.save(question);
         }).orElseThrow(() -> new RuntimeException("Question not found"));
+        
+        return questionMapper.mapTo(updatedEntity);
+    }
+
+    @Override
+    public Integer getQuestionNumber(UUID id) {
+        return questionRepository.findById(id)
+                .map(QuestionEntity::getNumber)
+                .orElseThrow(() -> new RuntimeException("Question not found with id: " + id));
     }
 
     @Override

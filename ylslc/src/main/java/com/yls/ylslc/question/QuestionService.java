@@ -17,13 +17,13 @@ public interface QuestionService {
 
     QuestionEntity createQuestion(QuestionEntity questionEntity);
 
-    Optional<QuestionEntity> findOne(UUID id, String username);
+    Optional<QuestionDto> findOne(UUID id, String username);
 
     void delete(UUID id);
 
     boolean isExist(UUID id);
 
-    QuestionEntity partialUpdate(UUID id, QuestionEntity questionEntity);
+    QuestionDto partialUpdate(UUID id, QuestionEntity questionEntity);
 
     String uploadImages(MultipartFile image, String questionNumber);
 
@@ -31,11 +31,13 @@ public interface QuestionService {
 
     void deleteImage(Integer questionNumber, String imageId);
 
-    QuestionEntity getQuestionById(UUID id);
+    QuestionDto getQuestionById(UUID id);
 
-    QuestionEntity updateStar(UUID id);
+    QuestionDto updateStar(UUID id);
     
     Page<QuestionDto> searchQuestionDtos(String searchQuery, Pageable pageable);
 
     public Map<String, Object> getQuestionStats(UUID userId);
+    
+    Integer getQuestionNumber(UUID id);
 }
