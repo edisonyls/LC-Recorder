@@ -12,8 +12,6 @@ import java.util.UUID;
 // @Service and @Component is the same, but we want to specify that
 // this is a service component
 public interface QuestionService {
-
-    Page<QuestionEntity> getQuestionsByUser(Pageable pageable, Sort sort);
     
     Page<QuestionDto> getQuestionDtosByUser(Pageable pageable, Sort sort);
 
@@ -36,8 +34,6 @@ public interface QuestionService {
     QuestionEntity getQuestionById(UUID id);
 
     QuestionEntity updateStar(UUID id);
-
-    Page<QuestionEntity> searchQuestions(String searchQuery, Pageable pageable);
     
     Page<QuestionDto> searchQuestionDtos(String searchQuery, Pageable pageable);
 

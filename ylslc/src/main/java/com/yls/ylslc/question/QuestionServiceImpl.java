@@ -34,35 +34,26 @@ public class QuestionServiceImpl implements QuestionService {
         this.questionMapper = questionMapper;
     }
 
-    public Page<QuestionEntity> searchQuestions(String searchQuery, Pageable pageable) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<UserEntity> currentUser = userService.findOneByUsername(username);
-        return currentUser
-                .map(user -> questionRepository.searchByTitleOrNumber(user, searchQuery, pageable))
-                .orElse(Page.empty());
-    }
-
-    @Override
-    public Page<QuestionEntity> getQuestionsByUser(Pageable pageable, Sort sort) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<UserEntity> currentUser = userService.findOneByUsername(username);
-        return currentUser
-                .map(user -> questionRepository.findByUser(user,
-                        PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort)))
-                .orElse(Page.empty());
-    }
-
     @Override
     @Transactional
     public Page<QuestionDto> getQuestionDtosByUser(Pageable pageable, Sort sort) {
-        Page<QuestionEntity> questionPage = getQuestionsByUser(pageable, sort);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<UserEntity> currentUser = userService.findOneByUsername(username);
+        Page<QuestionEntity> questionPage = currentUser
+                .map(user -> questionRepository.findByUser(user,
+                        PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort)))
+                .orElse(Page.empty());
         return questionPage.map(questionMapper::mapTo);
     }
 
     @Override
     @Transactional
     public Page<QuestionDto> searchQuestionDtos(String searchQuery, Pageable pageable) {
-        Page<QuestionEntity> questionPage = searchQuestions(searchQuery, pageable);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<UserEntity> currentUser = userService.findOneByUsername(username);
+        Page<QuestionEntity> questionPage = currentUser
+                .map(user -> questionRepository.searchByTitleOrNumber(user, searchQuery, pageable))
+                .orElse(Page.empty());
         return questionPage.map(questionMapper::mapTo);
     }
 
