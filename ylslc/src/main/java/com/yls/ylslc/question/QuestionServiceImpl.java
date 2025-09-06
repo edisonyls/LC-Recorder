@@ -1,5 +1,6 @@
 package com.yls.ylslc.question;
 
+import com.yls.ylslc.mappers.Mapper;
 import com.yls.ylslc.user.UserEntity;
 import com.yls.ylslc.user.UserService;
 import jakarta.transaction.Transactional;
@@ -23,11 +24,14 @@ import java.util.*;
 public class QuestionServiceImpl implements QuestionService {
     private final QuestionRepository questionRepository;
     private final UserService userService;
+    private final Mapper<QuestionEntity, QuestionDto> questionMapper;
 
     public QuestionServiceImpl(QuestionRepository theQuestionRepository,
-            UserService theUserService) {
+            UserService theUserService,
+            Mapper<QuestionEntity, QuestionDto> questionMapper) {
         this.questionRepository = theQuestionRepository;
         this.userService = theUserService;
+        this.questionMapper = questionMapper;
     }
 
     public Page<QuestionEntity> searchQuestions(String searchQuery, Pageable pageable) {
@@ -46,6 +50,20 @@ public class QuestionServiceImpl implements QuestionService {
                 .map(user -> questionRepository.findByUser(user,
                         PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort)))
                 .orElse(Page.empty());
+    }
+
+    @Override
+    @Transactional
+    public Page<QuestionDto> getQuestionDtosByUser(Pageable pageable, Sort sort) {
+        Page<QuestionEntity> questionPage = getQuestionsByUser(pageable, sort);
+        return questionPage.map(questionMapper::mapTo);
+    }
+
+    @Override
+    @Transactional
+    public Page<QuestionDto> searchQuestionDtos(String searchQuery, Pageable pageable) {
+        Page<QuestionEntity> questionPage = searchQuestions(searchQuery, pageable);
+        return questionPage.map(questionMapper::mapTo);
     }
 
     @Override

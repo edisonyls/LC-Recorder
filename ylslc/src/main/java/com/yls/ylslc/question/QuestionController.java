@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "api/question")
@@ -58,26 +57,45 @@ public class QuestionController {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<QuestionEntity> questionPage;
+        Page<QuestionDto> questionDtoPage;
 
         if (search != null && !search.isEmpty()) {
-            questionPage = questionService.searchQuestions(search, pageable);
+            questionDtoPage = questionService.searchQuestionDtos(search, pageable);
         } else {
-            questionPage = questionService.getQuestionsByUser(pageable, sort);
+            questionDtoPage = questionService.getQuestionDtosByUser(pageable, sort);
         }
 
-        List<QuestionDto> questionDtos = questionPage.stream()
-                .map(questionMapper::mapTo)
-                .collect(Collectors.toList());
-
-        return Response.ok(questionDtos, questionPage.getTotalElements(), "Questions retrieved successfully!");
+        return Response.ok(questionDtoPage.getContent(), questionDtoPage.getTotalElements(), "Questions retrieved successfully!");
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "upload-image")
     public Response uploadImages(@RequestPart("image") MultipartFile image,
-            @RequestPart("questionNumber") String questionNumber) {
-        String imageId = questionService.uploadImages(image, questionNumber);
+            @RequestPart(value = "questionNumber", required = false) String questionNumber,
+            @RequestPart(value = "questionId", required = false) String questionId) {
+        
+
+        String identifier = questionNumber != null ? questionNumber : 
+                           questionId != null ? questionId : "draft-" + System.currentTimeMillis();
+        
+        String imageId = questionService.uploadImages(image, identifier);
         return Response.ok(imageId, "Image saved successfully!");
+    }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "upload-images-bulk")
+    public Response uploadMultipleImages(@RequestPart("images") MultipartFile[] images,
+            @RequestPart(value = "questionNumber", required = false) String questionNumber,
+            @RequestPart(value = "questionId", required = false) String questionId) {
+        
+        String identifier = questionNumber != null ? questionNumber : 
+                           questionId != null ? questionId : "draft-" + System.currentTimeMillis();
+        
+        List<String> imageIds = new ArrayList<>();
+        for (MultipartFile image : images) {
+            String imageId = questionService.uploadImages(image, identifier);
+            imageIds.add(imageId);
+        }
+        
+        return Response.ok(imageIds, "Images saved successfully!");
     }
 
     @GetMapping("image/{questionId}/{imageId}")

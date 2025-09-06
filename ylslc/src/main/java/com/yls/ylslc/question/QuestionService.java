@@ -14,6 +14,8 @@ import java.util.UUID;
 public interface QuestionService {
 
     Page<QuestionEntity> getQuestionsByUser(Pageable pageable, Sort sort);
+    
+    Page<QuestionDto> getQuestionDtosByUser(Pageable pageable, Sort sort);
 
     QuestionEntity createQuestion(QuestionEntity questionEntity);
 
@@ -36,6 +38,8 @@ public interface QuestionService {
     QuestionEntity updateStar(UUID id);
 
     Page<QuestionEntity> searchQuestions(String searchQuery, Pageable pageable);
+    
+    Page<QuestionDto> searchQuestionDtos(String searchQuery, Pageable pageable);
 
     public Map<String, Object> getQuestionStats(UUID userId);
 }

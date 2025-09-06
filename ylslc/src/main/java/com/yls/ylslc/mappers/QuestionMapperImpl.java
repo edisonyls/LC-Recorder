@@ -14,6 +14,15 @@ public class QuestionMapperImpl implements Mapper<QuestionEntity, QuestionDto>{
 
     public QuestionMapperImpl(ModelMapper modelMapper){
         this.modelMapper = modelMapper;
+        configureMapper();
+    }
+    
+    private void configureMapper() {
+        modelMapper.typeMap(QuestionEntity.class, QuestionDto.class)
+                .addMappings(mapper -> mapper.skip(QuestionDto::setSolutions));
+                
+        modelMapper.typeMap(QuestionDto.class, QuestionEntity.class)
+                .addMappings(mapper -> mapper.skip(QuestionEntity::setSolutions));
     }
 
     @Override
@@ -32,7 +41,7 @@ public class QuestionMapperImpl implements Mapper<QuestionEntity, QuestionDto>{
     @Override
     public QuestionDto mapTo(QuestionEntity questionEntity) {
         QuestionDto questionDto = modelMapper.map(questionEntity, QuestionDto.class);
-        
+
         if (questionEntity.getSolutions() != null) {
             questionDto.setSolutions(new ArrayList<>(questionEntity.getSolutions()));
         } else {
