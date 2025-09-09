@@ -214,7 +214,7 @@ export const useQuestionHooks = (question, initialQuestion) => {
       timeOfCompletion: formatTime(question.timeOfCompletion),
       solutions: question.solutions.map((solution) => {
         const parsedContent = parseTipTapContent(solution?.content);
-        return parsedContent || JSON.stringify(getDefaultTipTapContent());
+        return parsedContent ? JSON.stringify(parsedContent) : JSON.stringify(getDefaultTipTapContent());
       }),
     };
     if (formattedData.success === true) {
