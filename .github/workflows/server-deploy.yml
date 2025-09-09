@@ -29,8 +29,7 @@ jobs:
             export JWT_SECRET="${{ secrets.JWT_SECRET }}"
             export UPGRADE_SECRET_KEY="${{ secrets.UPGRADE_SECRET_KEY }}"
 
-            sudo su
-            cd /root/LC-Recorder
+            cd /home/edisonyls/LeetCodeRecorder
             git pull
             cd ylslc
             ./mvnw clean package
