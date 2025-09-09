@@ -2,7 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../config/axiosConfig";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
-import { getDefaultTipTapContent } from "../utils/tipTapContentParser";
+import {
+  getDefaultTipTapContent,
+  parseTipTapContent,
+} from "../utils/tipTapContentParser";
 
 export const useQuestionHooks = (question, initialQuestion) => {
   const navigate = useNavigate();
@@ -167,7 +170,6 @@ export const useQuestionHooks = (question, initialQuestion) => {
             question.number
           );
           question.solutions = updatedSolutions;
-          console.log(question);
           const submitResult = await submitRestData(question.id);
           if (submitResult) {
             navigate("/table");
@@ -211,13 +213,8 @@ export const useQuestionHooks = (question, initialQuestion) => {
         : "",
       timeOfCompletion: formatTime(question.timeOfCompletion),
       solutions: question.solutions.map((solution) => {
-        if (typeof solution?.content === "string") {
-          return solution.content;
-        } else if (typeof solution?.content === "object") {
-          return JSON.stringify(solution.content);
-        } else {
-          return JSON.stringify(getDefaultTipTapContent());
-        }
+        const parsedContent = parseTipTapContent(solution?.content);
+        return parsedContent || JSON.stringify(getDefaultTipTapContent());
       }),
     };
     if (formattedData.success === true) {
@@ -231,10 +228,8 @@ export const useQuestionHooks = (question, initialQuestion) => {
         response = await axiosInstance.post("question", formattedData);
       }
       if (response && response.data.serverMessage === "SUCCESS") {
-        console.log("Form submission successful", response.data.data);
         return true;
       } else {
-        console.log(response.data);
         return false;
       }
     } catch (error) {

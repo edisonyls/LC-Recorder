@@ -59,14 +59,11 @@ const Dashboard = () => {
   // Calculate current streak
   const calculateCurrentStreak = () => {
     if (!stats?.createdAtStats || stats.createdAtStats.length === 0) {
-      console.log("No stats data available for streak calculation");
       return 0;
     }
 
     const today = moment().startOf("day");
     let currentStreak = 0;
-
-    console.log("Calculating streak with data:", stats.createdAtStats);
 
     // Sort dates in descending order and remove duplicates
     const uniqueDates = [
@@ -79,17 +76,10 @@ const Dashboard = () => {
       .map((dateStr) => moment(dateStr, "YYYY-MM-DD"))
       .sort((a, b) => b.valueOf() - a.valueOf());
 
-    console.log(
-      "Unique dates for streak calculation:",
-      uniqueDates.map((d) => d.format("YYYY-MM-DD"))
-    );
-
     // Check if there's activity today
     const hasActivityToday = uniqueDates.some((date) =>
       date.isSame(today, "day")
     );
-
-    console.log("Has activity today:", hasActivityToday);
 
     if (hasActivityToday) {
       currentStreak = 1;
@@ -120,22 +110,18 @@ const Dashboard = () => {
       }
     }
 
-    console.log("Calculated streak:", currentStreak);
     return currentStreak;
   };
 
   // Calculate total problems and success rate
   const calculateStats = () => {
     if (!stats) {
-      console.log("No stats available, returning default values");
       return {
         totalProblems: 0,
         successRate: 0,
         currentStreak: 0,
       };
     }
-
-    console.log("Calculating stats with data:", stats);
 
     const totalProblems = stats.questionCount || 0;
     const solvedProblems =
@@ -150,7 +136,6 @@ const Dashboard = () => {
       currentStreak,
     };
 
-    console.log("Calculated stats:", result);
     return result;
   };
 

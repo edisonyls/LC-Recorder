@@ -53,7 +53,6 @@ export const UserHooks = () => {
         type: userActionTypes.SIGN_IN,
         payload: { token, user },
       });
-      console.log(user);
       if (user.role === "REGULAR") {
         navigate("/table");
       } else {

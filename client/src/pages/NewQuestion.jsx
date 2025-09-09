@@ -20,14 +20,13 @@ const NewQuestion = () => {
   const navigate = useNavigate();
 
   const handleTimeSubmit = (time) => {
-    console.log(time);
     setTimeOfCompletion(time);
   };
 
   return (
     <Box display="flex" flexDirection="column" minHeight="100vh">
       <AuthenticatedNavbar />
-      
+
       {/* Header with Back button and Title */}
       <Box
         sx={{
@@ -45,26 +44,24 @@ const NewQuestion = () => {
           onClick={() => setDialogOpen(true)}
           buttonText="Back"
         />
-
         <Typography
           variant="h5"
-          sx={{ 
+          sx={{
             textAlign: "center",
             fontWeight: 600,
           }}
         >
           {question === null ? "Upload New Question" : "Modify Question"}
         </Typography>
-
         <Box sx={{ width: "80px" }} /> {/* Spacer for balance */}
       </Box>
 
       {/* Stopwatch - Prominently displayed at the top */}
       {withTimer && (
-        <Box 
-          sx={{ 
-            display: "flex", 
-            justifyContent: "center", 
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
             paddingX: 2,
             marginBottom: 2,
           }}

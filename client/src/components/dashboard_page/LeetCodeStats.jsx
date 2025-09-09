@@ -100,9 +100,6 @@ const LeetCodeStats = ({ userId, stats: propsStats }) => {
     },
   ];
 
-  console.log("Difficulty data for chart:", difficultyData);
-  console.log("Stats object:", stats);
-
   const totalProblems = stats.questionCount || 0;
   const solvedProblems =
     stats.successDistribution?.find((s) => s.success === 1)?.count || 0;

@@ -49,10 +49,6 @@ const TipTapSolution = ({
   };
 
   const handleDeleteClick = () => {
-    console.log(
-      "TipTapSolution: handleDeleteClick called for solution",
-      solutionId
-    );
     deleteSolution();
     handleMenuClose();
   };
