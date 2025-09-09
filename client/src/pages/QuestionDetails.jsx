@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { axiosInstance } from "../config/axiosConfig";
 import AuthenticatedNavbar from "../components/navbar/AuthenticatedNavbar";
-import CodeSnippet from "../components/CodeSnippet";
+
+import TipTapViewer from "../components/TipTapViewer";
 import {
   Container,
   Card,
@@ -14,8 +15,6 @@ import {
   Avatar,
   Box,
   Paper,
-  Modal,
-  IconButton,
   Stack,
 } from "@mui/material";
 import {
@@ -25,11 +24,8 @@ import {
   Timer,
   QueryStats,
   ArrowBack,
-  Close,
   Terrain,
   Code,
-  Lightbulb,
-  Image as ImageIcon,
 } from "@mui/icons-material";
 import SyncIcon from "@mui/icons-material/Sync";
 import { WhiteBackgroundButton } from "../components/generic/GenericButton";
@@ -40,9 +36,6 @@ import RandomQuote from "../components/RandomQuote";
 const QuestionDetails = () => {
   const [question, setQuestion] = useState();
   const [loading, setLoading] = useState(false);
-  const [images, setImages] = useState({});
-  const [open, setOpen] = useState(false);
-  const [currentImage, setCurrentImage] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = location.state || {};
@@ -54,9 +47,6 @@ const QuestionDetails = () => {
         .get("question/" + id)
         .then((response) => {
           setQuestion(response.data.data);
-          if (response.data.data.solutions !== null) {
-            fetchImage(response.data.data);
-          }
         })
         .catch((error) => {
           console.log("Failed to fetch data: ", error);
@@ -64,44 +54,11 @@ const QuestionDetails = () => {
       setLoading(false);
     };
 
-    const fetchImage = async (question) => {
-      const newImages = {};
-      for (const solution of question.solutions) {
-        if (solution.imageId === null || solution.imageId === "") {
-          continue;
-        }
-        try {
-          const response = await axiosInstance.get(
-            `question/image/${question.id}/${solution.imageId}`,
-            {
-              responseType: "blob",
-            }
-          );
-          const imageBlob = response.data;
-          const imageObjectURL = URL.createObjectURL(imageBlob);
-
-          newImages[solution.imageId] = imageObjectURL;
-        } catch (error) {
-          console.error("Failed to fetch image", error);
-        }
-      }
-      setImages(newImages);
-    };
-
     fetchData();
   }, [id]);
 
   const handleUpdate = () => {
     navigate("/new", { state: { question: question } });
-  };
-
-  const handleOpen = (imgSrc) => {
-    setCurrentImage(imgSrc);
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
   };
 
   const getDifficultyColor = (difficulty) => {
@@ -357,9 +314,8 @@ const QuestionDetails = () => {
         {question.solutions && question.solutions.length > 0 && (
           <Box>
             <Typography
-              variant="h4"
-              component="h2"
-              sx={{ mb: 3, fontWeight: 600, textAlign: "center" }}
+              variant="h5"
+              sx={{ mb: 3, fontWeight: 600, color: "text.primary" }}
             >
               {question.solutions.length} Solution(s)
             </Typography>
@@ -383,182 +339,18 @@ const QuestionDetails = () => {
                   />
 
                   <CardContent sx={{ pt: 0 }}>
-                    <Stack spacing={3}>
-                      {solution.thinkingProcess &&
-                        solution.thinkingProcess.trim() !== "" && (
-                          <Box>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                mb: 2,
-                              }}
-                            >
-                              <Lightbulb sx={{ mr: 2, color: "info.main" }} />
-                              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                Thinking Process
-                              </Typography>
-                            </Box>
-                            <Paper
-                              elevation={0}
-                              sx={{
-                                p: 2,
-                                backgroundColor: "background.elevated",
-                                border: "1px solid",
-                                borderColor: "divider",
-                              }}
-                            >
-                              <Typography
-                                variant="body1"
-                                sx={{
-                                  whiteSpace: "pre-wrap",
-                                  lineHeight: 1.6,
-                                }}
-                              >
-                                {solution.thinkingProcess}
-                              </Typography>
-                            </Paper>
-                          </Box>
-                        )}
-
-                      {solution.codeSnippet &&
-                        solution.codeSnippet.trim() !== "" && (
-                          <Box>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                mb: 2,
-                              }}
-                            >
-                              <Code sx={{ mr: 2, color: "success.main" }} />
-                              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                Code Implementation
-                              </Typography>
-                            </Box>
-                            <CodeSnippet code={solution.codeSnippet} />
-                          </Box>
-                        )}
-
-                      {solution.imageId && images[solution.imageId] && (
-                        <Box>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              mb: 2,
-                            }}
-                          >
-                            <ImageIcon sx={{ mr: 2, color: "primary.main" }} />
-                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                              Visual Explanation
-                            </Typography>
-                          </Box>
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              p: 2,
-                              backgroundColor: "background.elevated",
-                              border: "1px solid",
-                              borderColor: "divider",
-                              cursor: "pointer",
-                              transition: "all 0.3s ease",
-                              "&:hover": {
-                                borderColor: "primary.main",
-                                transform: "translateY(-2px)",
-                              },
-                            }}
-                            onClick={() => handleOpen(images[solution.imageId])}
-                          >
-                            <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                minHeight: "150px",
-                              }}
-                            >
-                              <img
-                                src={images[solution.imageId]}
-                                alt="Solution diagram"
-                                style={{
-                                  maxWidth: "60%",
-                                  maxHeight: "250px",
-                                  objectFit: "contain",
-                                  borderRadius: "4px",
-                                }}
-                              />
-                            </Box>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ textAlign: "center", mt: 1 }}
-                            >
-                              Click to enlarge
-                            </Typography>
-                          </Paper>
-                        </Box>
-                      )}
-                    </Stack>
+                    <Box sx={{ "& > div": { mb: 0 } }}>
+                      <TipTapViewer
+                        content={solution}
+                        questionId={question.id}
+                      />
+                    </Box>
                   </CardContent>
                 </Card>
               ))}
             </Stack>
           </Box>
         )}
-
-        {/* Image Modal */}
-        <Modal
-          open={open}
-          onClose={handleClose}
-          aria-labelledby="image-modal"
-          aria-describedby="enlarged-image-view"
-        >
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              bgcolor: "background.paper",
-              boxShadow: 24,
-              borderRadius: 2,
-              p: 2,
-              maxWidth: "90vw",
-              maxHeight: "90vh",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              overflow: "hidden",
-            }}
-          >
-            <IconButton
-              onClick={handleClose}
-              sx={{
-                position: "absolute",
-                top: 16,
-                right: 16,
-                bgcolor: "rgba(0, 0, 0, 0.5)",
-                color: "white",
-                "&:hover": {
-                  bgcolor: "rgba(0, 0, 0, 0.7)",
-                },
-              }}
-              aria-label="close"
-            >
-              <Close />
-            </IconButton>
-            <img
-              src={currentImage}
-              alt="Enlarged solution diagram"
-              style={{
-                maxWidth: "100%",
-                maxHeight: "100%",
-                objectFit: "contain",
-              }}
-            />
-          </Box>
-        </Modal>
       </Container>
 
       <Box sx={{ mt: 6 }}>

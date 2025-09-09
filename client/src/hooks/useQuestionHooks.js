@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../config/axiosConfig";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
+import { getDefaultTipTapContent } from "../utils/tipTapContentParser";
 
 export const useQuestionHooks = (question, initialQuestion) => {
   const navigate = useNavigate();
@@ -209,11 +210,15 @@ export const useQuestionHooks = (question, initialQuestion) => {
         ? question.dateOfCompletion.format("YYYY-MM-DD")
         : "",
       timeOfCompletion: formatTime(question.timeOfCompletion),
-      solutions: question.solutions.map((solution) => ({
-        thinkingProcess: solution.thinkingProcess,
-        codeSnippet: solution.codeSnippet,
-        imageId: solution.imageId,
-      })),
+      solutions: question.solutions.map((solution) => {
+        if (typeof solution?.content === "string") {
+          return solution.content;
+        } else if (typeof solution?.content === "object") {
+          return JSON.stringify(solution.content);
+        } else {
+          return JSON.stringify(getDefaultTipTapContent());
+        }
+      }),
     };
     if (formattedData.success === true) {
       formattedData.reasonOfFail = "";

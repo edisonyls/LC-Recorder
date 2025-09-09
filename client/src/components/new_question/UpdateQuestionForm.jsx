@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Container,
   TextField,
@@ -13,25 +13,51 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers";
-import Solution from "./Solution";
+import TipTapSolution from "./TipTapSolution";
 import NewQuestionFooter from "./NewQuestionFooter";
 import { Star, StarBorder } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import { GenericDialog } from "../generic/GenericDialog";
 import { useQuestionHooks } from "../../hooks/useQuestionHooks";
-import { axiosInstance } from "../../config/axiosConfig";
+import {
+  getDefaultTipTapContent,
+  parseTipTapContent,
+} from "../../utils/tipTapContentParser";
 
 const UpdateQuestionForm = ({ initialQuestion }) => {
-  const [question, setQuestion] = useState(
-    initialQuestion
-      ? {
-          ...initialQuestion,
-          dateOfCompletion: initialQuestion.dateOfCompletion
-            ? dayjs(initialQuestion.dateOfCompletion)
-            : null,
-        }
-      : {}
-  );
+  const [question, setQuestion] = useState(() => {
+    if (!initialQuestion) return {};
+
+    // Handle solutions: ensure they have proper structure
+    let solutions = [];
+    if (initialQuestion.solutions && initialQuestion.solutions.length > 0) {
+      solutions = initialQuestion.solutions.map((solution, index) => {
+        const parsedContent = parseTipTapContent(solution);
+        return {
+          id: `solution_${Date.now()}_${index}`,
+          content: parsedContent
+            ? JSON.stringify(parsedContent)
+            : JSON.stringify(getDefaultTipTapContent()),
+        };
+      });
+    } else {
+      // If no solutions exist, create a default one
+      solutions = [
+        {
+          id: `solution_${Date.now()}_0`,
+          content: JSON.stringify(getDefaultTipTapContent()),
+        },
+      ];
+    }
+
+    return {
+      ...initialQuestion,
+      solutions,
+      dateOfCompletion: initialQuestion.dateOfCompletion
+        ? dayjs(initialQuestion.dateOfCompletion)
+        : null,
+    };
+  });
 
   const [deleteSolutionPopUp, setDeleteSolutionPopUp] = useState(false);
   const [solutionDeleteId, setSolutionDeleteId] = useState(null);
@@ -39,44 +65,6 @@ const UpdateQuestionForm = ({ initialQuestion }) => {
   const { handleUpdateSubmit } = useQuestionHooks(question, initialQuestion);
 
   const difficultyOptions = ["Easy", "Medium", "Hard"];
-
-  useEffect(() => {
-    const fetchImages = async () => {
-      const newSolutions = [...question.solutions];
-      let updatesMade = false;
-
-      for (const [index, solution] of newSolutions.entries()) {
-        if (solution.imageId && !solution.imagePreviewUrl) {
-          try {
-            const response = await axiosInstance.get(
-              `question/image/${question.id}/${solution.imageId}`,
-              {
-                responseType: "blob",
-              }
-            );
-            const imageBlob = response.data;
-            const imageObjectURL = URL.createObjectURL(imageBlob);
-            newSolutions[index].imagePreviewUrl = imageObjectURL;
-            updatesMade = true;
-          } catch (error) {
-            console.error(
-              "Failed to fetch image for solution",
-              solution.imageId,
-              error
-            );
-          }
-        }
-      }
-
-      if (updatesMade) {
-        setQuestion((prev) => ({ ...prev, solutions: newSolutions }));
-      }
-    };
-
-    if (question.solutions) {
-      fetchImages();
-    }
-  }, [question.id, question.solutions]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -138,96 +126,46 @@ const UpdateQuestionForm = ({ initialQuestion }) => {
     });
   };
 
-  const handleSolutionChange = (event, index) => {
-    const { name, value } = event.target;
+  const handleTipTapContentChange = (content, solutionId) => {
     setQuestion((prevQuestion) => {
-      const updatedSolutions = [...prevQuestion.solutions];
-      updatedSolutions[index] = {
-        ...updatedSolutions[index],
-        [name]: value,
-      };
+      const updatedSolutions = prevQuestion.solutions.map((solution) => {
+        if (solution.id === solutionId) {
+          return { ...solution, content: JSON.stringify(content) };
+        }
+        return solution;
+      });
       return { ...prevQuestion, solutions: updatedSolutions };
     });
   };
 
   const addSolution = () => {
-    const lastSolution = question.solutions[question.solutions.length - 1];
-    if (
-      !lastSolution.thinkingProcess.trim() &&
-      !lastSolution.codeSnippet.trim() &&
-      !lastSolution.imagePreviewUrl
-    ) {
-      toast.error(
-        "Please fill in the current solution before adding a new one."
-      );
-
-      return;
-    }
     const newSolution = {
-      thinkingProcess: "",
-      codeSnippet: "",
-      showCodeInput: false,
-      imagePreviewUrl: "",
-      file: null,
-      imageId: "",
+      id: `solution_${Date.now()}_${Math.random()}`,
+      content: JSON.stringify(getDefaultTipTapContent()),
     };
     setQuestion((prevQuestions) => ({
       ...prevQuestions,
-      solutions: [...prevQuestions.solutions, newSolution],
+      solutions: [...(prevQuestions.solutions || []), newSolution],
     }));
   };
 
   const handleDeleteSolution = () => {
-    setQuestion((prevQuestions) => {
-      // Filter out the solution at the given index
-      const updatedSolutions = prevQuestions.solutions.filter(
-        (_, solutionIndex) => solutionIndex !== solutionDeleteId
-      );
+    if (solutionDeleteId !== null) {
+      setQuestion((prevQuestions) => {
+        // Filter out the solution with the given id
+        const updatedSolutions = (prevQuestions.solutions || []).filter(
+          (solution) => {
+            const shouldKeep = solution.id !== solutionDeleteId;
+            return shouldKeep;
+          }
+        );
+
+        return { ...prevQuestions, solutions: updatedSolutions };
+      });
+
       setSolutionDeleteId(null);
       setDeleteSolutionPopUp(false);
-      return { ...prevQuestions, solutions: updatedSolutions };
-    });
-  };
-
-  const handleFileChange = (e, index) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setQuestion((prevQuestion) => {
-        const updatedSolutions = [...prevQuestion.solutions];
-        updatedSolutions[index] = {
-          ...updatedSolutions[index],
-          imagePreviewUrl: imageUrl,
-          file: file,
-          inputKey: Date.now(),
-        };
-        return { ...prevQuestion, solutions: updatedSolutions };
-      });
     }
-  };
-
-  const handleDeleteImage = (index) => {
-    setQuestion((prevQuestion) => {
-      const updatedSolutions = [...prevQuestion.solutions];
-      updatedSolutions[index] = {
-        ...updatedSolutions[index],
-        imagePreviewUrl: "",
-        file: null,
-        imageId: "",
-      };
-      return { ...prevQuestion, solutions: updatedSolutions };
-    });
-  };
-
-  const deleteCodeSnippet = (index) => {
-    setQuestion((prevQuestion) => {
-      const updatedSolutions = [...prevQuestion.solutions];
-      updatedSolutions[index] = {
-        ...updatedSolutions[index],
-        codeSnippet: "",
-      };
-      return { ...prevQuestion, solutions: updatedSolutions };
-    });
   };
 
   return (
@@ -401,24 +339,34 @@ const UpdateQuestionForm = ({ initialQuestion }) => {
           Solutions
         </Typography>
         <Box sx={{ mt: 2 }}>
-          {question.solutions.map((solution, index) => (
-            <Solution
-              key={index}
-              solutionId={index + 1}
-              deleteSolution={() => {
-                setDeleteSolutionPopUp(true);
-                setSolutionDeleteId(index);
-              }}
-              thinkingProcess={solution.thinkingProcess}
-              codeSnippet={solution.codeSnippet}
-              handleChange={(e) => handleSolutionChange(e, index)}
-              deleteCodeSnippet={() => deleteCodeSnippet(index)}
-              imagePreviewUrl={solution.imagePreviewUrl}
-              handleFileChange={(e) => handleFileChange(e, index)}
-              handleDeleteImage={() => handleDeleteImage(index)}
-              showDeleteButton={question.solutions.length > 1}
+          {question.solutions && question.solutions.length > 0 ? (
+            question.solutions.map((solution, index) => (
+              <TipTapSolution
+                key={solution.id}
+                solutionId={index + 1}
+                deleteSolution={() => {
+                  setDeleteSolutionPopUp(true);
+                  setSolutionDeleteId(solution.id);
+                }}
+                showDeleteButton={question.solutions.length > 1}
+                content={solution.content}
+                onContentChange={(content) =>
+                  handleTipTapContentChange(content, solution.id)
+                }
+              />
+            ))
+          ) : (
+            <TipTapSolution
+              key="default-solution"
+              solutionId={1}
+              deleteSolution={() => {}}
+              showDeleteButton={false}
+              content={JSON.stringify(getDefaultTipTapContent())}
+              onContentChange={(content) =>
+                handleTipTapContentChange(content, "default-solution")
+              }
             />
-          ))}
+          )}
         </Box>
 
         <NewQuestionFooter onClick={addSolution} />
@@ -430,7 +378,11 @@ const UpdateQuestionForm = ({ initialQuestion }) => {
           setSolutionDeleteId(null);
         }}
         onConfirm={handleDeleteSolution}
-        title={`Deleting Solution ${solutionDeleteId + 1}`}
+        title={`Deleting Solution ${
+          solutionDeleteId !== null
+            ? question.solutions.findIndex((s) => s.id === solutionDeleteId) + 1
+            : ""
+        }`}
         content="Do you want to delete this solution?"
       />
     </Container>
