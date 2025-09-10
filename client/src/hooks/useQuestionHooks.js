@@ -183,7 +183,6 @@ export const useQuestionHooks = (question, initialQuestion) => {
     const deletePromises = imagesToBeDeleted.map((imageId) => {
       return axiosInstance
         .delete(`question/image/${question.id}/${imageId}`)
-        .then((response) => console.log(`Deleted imageId: ${imageId}`))
         .catch((error) =>
           console.error(`Error deleting imageId: ${imageId}`, error)
         );

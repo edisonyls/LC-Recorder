@@ -99,12 +99,10 @@ const TipTapViewer = ({ content, title, solutionId, questionId }) => {
 
     if (globalImageCache.has(cacheKey)) {
       const cachedUrl = globalImageCache.get(cacheKey);
-      console.log(`Using global cached blob URL for ${imageId}`);
       return cachedUrl;
     }
 
     try {
-      console.log(`🔐 Fetching authenticated image: ${imageId}`);
       const response = await axiosInstance.get(
         `/question/image/${questionId}/${imageId}`,
         {

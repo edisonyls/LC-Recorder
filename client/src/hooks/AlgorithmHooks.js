@@ -21,7 +21,7 @@ export const AlgorithmHooks = () => {
         type: algorithmActionTypes.PROCESS_FAILURE,
         error: error,
       });
-      console.log("Failed to fetch algorithm: ", error);
+      console.error("Failed to fetch algorithm: ", error);
     }
   };
 
@@ -177,7 +177,7 @@ export const AlgorithmHooks = () => {
       if (response.data.serverMessage === "SUCCESS") {
         return { ...section, content: response.data.data };
       } else {
-        console.log("Image upload failed.");
+        console.error("Image upload failed.");
         return section;
       }
     } catch (error) {

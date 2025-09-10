@@ -49,7 +49,7 @@ const QuestionDetails = () => {
           setQuestion(response.data.data);
         })
         .catch((error) => {
-          console.log("Failed to fetch data: ", error);
+          console.error("Failed to fetch data: ", error);
         });
       setLoading(false);
     };

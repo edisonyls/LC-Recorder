@@ -152,7 +152,6 @@ const UpgradePage = () => {
     }
 
     if (currentRole === newRole) {
-      console.log("User is already in the selected role.");
       return;
     }
 
@@ -168,11 +167,11 @@ const UpgradePage = () => {
         toast.success("Upgrade successfully!");
         navigate("/profile");
       } else {
-        console.log("Upgrade failed:", response.data);
+        console.error("Upgrade failed:", response.data);
         toast.error(response.data.message);
       }
     } catch (error) {
-      console.log("Upgrade failed:", error);
+      console.error("Upgrade failed:", error);
     }
   };
 

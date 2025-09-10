@@ -16,7 +16,7 @@ const DataStructureStats = ({ userId }) => {
         );
         setDataStructureNumber(response.data.data);
       } catch (err) {
-        console.log("Error while fetching the question stats: " + err);
+        console.error("Error while fetching the question stats: " + err);
       }
     };
     fetchData();

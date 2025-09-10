@@ -38,7 +38,7 @@ export const DataStructureHooks = () => {
         type: actionTypes.PROCESS_FAILURE,
         error: error,
       });
-      console.log("Failed to add a new data structure: ", error);
+      console.error("Failed to add a new data structure: ", error);
     }
   };
 
@@ -54,7 +54,7 @@ export const DataStructureHooks = () => {
       });
     } catch (error) {
       dispatch({ type: actionTypes.PROCESS_FAILURE, error: error });
-      console.log("Failed to rename: ", error);
+      console.error("Failed to rename: ", error);
     }
   };
 
@@ -68,7 +68,7 @@ export const DataStructureHooks = () => {
       });
     } catch (error) {
       dispatch({ type: actionTypes.PROCESS_FAILURE, error: error });
-      console.log("Failed to delete the data structure: ", error);
+      console.error("Failed to delete the data structure: ", error);
     }
   };
 

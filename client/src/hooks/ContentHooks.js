@@ -23,11 +23,9 @@ export const ContentHooks = () => {
       });
       if (response.data.serverMessage === "SUCCESS") {
         return response.data.data;
-      } else {
-        console.log("Image upload failed for content");
       }
     } catch (error) {
-      console.log("Error while uploading content image: " + error);
+      console.error("Error while uploading content image: " + error);
     }
   };
 
