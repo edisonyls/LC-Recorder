@@ -84,7 +84,16 @@ const TipTapMenuBar = ({ solutionId, onContentChange }) => {
 
     if (file) {
       const imageUrl = URL.createObjectURL(file);
-      editor.chain().focus().setImage({ src: imageUrl }).run();
+      const imageId = `temp_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+
+      editor.chain().focus().setImage({ src: imageUrl, alt: imageId }).run();
+
+      if (onContentChange) {
+        const currentContent = editor.getJSON();
+        onContentChange(currentContent, { file, imageId, blobUrl: imageUrl });
+      }
     } else {
       alert("Please select an image file.");
     }

@@ -230,12 +230,19 @@ const TipTapSolution = ({
           extensions={extensions}
           content={parsedContent || getDefaultTipTapContent()}
           onUpdate={({ editor }) => {
-            onContentChange(editor.getJSON());
+            const currentContent = editor.getJSON();
+            onContentChange(currentContent);
           }}
           slotBefore={
             <TipTapMenuBar
               solutionId={solutionId}
-              onContentChange={onContentChange}
+              onContentChange={(content, imageInfo) => {
+                if (imageInfo) {
+                  onContentChange(content, imageInfo);
+                } else {
+                  onContentChange(content);
+                }
+              }}
             />
           }
         />

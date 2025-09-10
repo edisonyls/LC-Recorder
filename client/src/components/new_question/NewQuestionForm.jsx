@@ -35,8 +35,10 @@ const NewQuestionForm = ({ timerValue }) => {
     solutions: [
       {
         id: `solution_${Date.now()}_0`,
-        content: JSON.stringify(getDefaultTipTapContent())
-      }
+        content: JSON.stringify(getDefaultTipTapContent()),
+        files: [],
+        imageMap: new Map(),
+      },
     ],
   });
   const [deleteSolutionPopUp, setDeleteSolutionPopUp] = useState(false);
@@ -106,11 +108,25 @@ const NewQuestionForm = ({ timerValue }) => {
     });
   };
 
-  const handleTipTapContentChange = (content, solutionId) => {
+  const handleTipTapContentChange = (content, solutionId, imageInfo) => {
     setQuestion((prevQuestion) => {
       const updatedSolutions = prevQuestion.solutions.map((solution) => {
         if (solution.id === solutionId) {
-          return { ...solution, content: JSON.stringify(content) };
+          const updatedSolution = {
+            ...solution,
+            content: JSON.stringify(content),
+          };
+
+          if (imageInfo && imageInfo.file) {
+            updatedSolution.files = updatedSolution.files || [];
+            updatedSolution.imageMap = updatedSolution.imageMap || new Map();
+            if (!updatedSolution.imageMap.has(imageInfo.blobUrl)) {
+              updatedSolution.files.push(imageInfo.file);
+              updatedSolution.imageMap.set(imageInfo.blobUrl, imageInfo.file);
+            }
+          }
+
+          return updatedSolution;
         }
         return solution;
       });
@@ -123,7 +139,9 @@ const NewQuestionForm = ({ timerValue }) => {
 
     const newSolution = {
       id: `solution_${Date.now()}_${Math.random()}`,
-      content: JSON.stringify(getDefaultTipTapContent())
+      content: JSON.stringify(getDefaultTipTapContent()),
+      files: [],
+      imageMap: new Map(),
     };
     setQuestion((prevQuestions) => ({
       ...prevQuestions,
@@ -335,9 +353,9 @@ const NewQuestionForm = ({ timerValue }) => {
               }}
               showDeleteButton={question.solutions.length > 1}
               content={solution.content}
-              onContentChange={(content) =>
-                handleTipTapContentChange(content, solution.id)
-              }
+              onContentChange={(content, imageInfo) => {
+                handleTipTapContentChange(content, solution.id, imageInfo);
+              }}
             />
           ))}
         </Box>
@@ -352,8 +370,9 @@ const NewQuestionForm = ({ timerValue }) => {
         }}
         onConfirm={handleDeleteSolution}
         title={`Deleting Solution ${
-          solutionDeleteId !== null ? 
-            question.solutions.findIndex(s => s.id === solutionDeleteId) + 1 : ""
+          solutionDeleteId !== null
+            ? question.solutions.findIndex((s) => s.id === solutionDeleteId) + 1
+            : ""
         }`}
         content="Do you want to delete this solution?"
       />

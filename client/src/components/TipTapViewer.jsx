@@ -1,8 +1,134 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Paper, Typography, Box } from "@mui/material";
 import { parseTipTapContent } from "../utils/tipTapContentParser";
+import { axiosInstance } from "../config/axiosConfig";
+
+// Component to handle authenticated image loading
+const AuthenticatedImage = ({
+  imageId,
+  questionId,
+  fetchAuthenticatedImage,
+}) => {
+  const [imageSrc, setImageSrc] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        const blobUrl = await fetchAuthenticatedImage(imageId);
+        if (blobUrl) {
+          setImageSrc(blobUrl);
+        } else {
+          setError(true);
+        }
+      } catch (err) {
+        console.error("Failed to load image:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadImage();
+  }, [imageId, questionId, fetchAuthenticatedImage]);
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          maxWidth: "100%",
+          height: "100px",
+          borderRadius: "4px",
+          border: "1px solid #333333",
+          margin: "8px 0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#f5f5f5",
+          color: "#666",
+        }}
+      >
+        Loading image...
+      </div>
+    );
+  }
+
+  if (error || !imageSrc) {
+    return (
+      <div
+        style={{
+          maxWidth: "100%",
+          height: "50px",
+          borderRadius: "4px",
+          border: "1px solid #ff0000",
+          margin: "8px 0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#ffe6e6",
+          color: "#ff0000",
+        }}
+      >
+        Failed to load image
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={imageSrc}
+      alt="Solution visual"
+      style={{
+        maxWidth: "100%",
+        height: "auto",
+        borderRadius: "4px",
+        border: "1px solid #333333",
+        margin: "8px 0",
+      }}
+    />
+  );
+};
+
+// Global cache shared across all TipTapViewer instances
+const globalImageCache = new Map();
 
 const TipTapViewer = ({ content, title, solutionId, questionId }) => {
+  const fetchAuthenticatedImage = async (imageId) => {
+    const cacheKey = `${questionId}-${imageId}`;
+
+    if (globalImageCache.has(cacheKey)) {
+      const cachedUrl = globalImageCache.get(cacheKey);
+      console.log(`Using global cached blob URL for ${imageId}`);
+      return cachedUrl;
+    }
+
+    try {
+      console.log(`🔐 Fetching authenticated image: ${imageId}`);
+      const response = await axiosInstance.get(
+        `/question/image/${questionId}/${imageId}`,
+        {
+          responseType: "blob",
+        }
+      );
+      const blob = response.data;
+      const blobUrl = URL.createObjectURL(blob);
+
+      // Store in global cache
+      globalImageCache.set(cacheKey, blobUrl);
+      return blobUrl;
+    } catch (error) {
+      console.error(`Failed to fetch image ${imageId}:`, error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      // TODO: implement a more sophisticated cleanup strategy
+    };
+  }, []);
+
   const renderContent = (node) => {
     if (!node || typeof node !== "object") return null;
 
@@ -183,24 +309,33 @@ const TipTapViewer = ({ content, title, solutionId, questionId }) => {
         return element;
 
       case "image":
-        return (
-          <img
-            src={`/api/question/image/${questionId || ""}/${
-              node.attrs?.src || ""
-            }`}
-            alt="Solution visual"
-            style={{
-              maxWidth: "100%",
-              height: "auto",
-              borderRadius: "4px",
-              border: "1px solid #333333",
-              margin: "8px 0",
-            }}
-            onError={(e) => {
-              e.target.style.display = "none";
-            }}
-          />
-        );
+        const imageSrc = node.attrs?.src || "";
+
+        if (imageSrc.startsWith("/api/") || imageSrc.startsWith("http")) {
+          return (
+            <img
+              src={imageSrc}
+              alt="Solution visual"
+              style={{
+                maxWidth: "100%",
+                height: "auto",
+                borderRadius: "4px",
+                border: "1px solid #333333",
+                margin: "8px 0",
+              }}
+            />
+          );
+        } else if (imageSrc && questionId) {
+          return (
+            <AuthenticatedImage
+              imageId={imageSrc}
+              questionId={questionId}
+              fetchAuthenticatedImage={fetchAuthenticatedImage}
+            />
+          );
+        } else {
+          return null;
+        }
 
       default:
         return null;

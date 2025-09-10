@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   TextField,
@@ -22,7 +22,61 @@ import { useQuestionHooks } from "../../hooks/useQuestionHooks";
 import {
   getDefaultTipTapContent,
   parseTipTapContent,
+  cleanupBlobUrlsFromDatabaseContent,
 } from "../../utils/tipTapContentParser";
+import { axiosInstance } from "../../config/axiosConfig";
+
+const convertImageIdsToBlobs = async (content, questionId) => {
+  if (!content || typeof content !== "object") {
+    return content;
+  }
+
+  if (Array.isArray(content)) {
+    const results = await Promise.all(
+      content.map((item) => convertImageIdsToBlobs(item, questionId))
+    );
+    return results.filter(Boolean);
+  }
+
+  const processed = { ...content };
+
+  if (processed.type === "image" && processed.attrs?.src) {
+    const src = processed.attrs.src;
+    if (
+      src &&
+      !src.startsWith("blob:") &&
+      !src.startsWith("http") &&
+      !src.startsWith("/api")
+    ) {
+      try {
+        const response = await axiosInstance.get(
+          `/question/image/${questionId}/${src}`,
+          {
+            responseType: "blob",
+          }
+        );
+        const blob = response.data;
+        const blobUrl = URL.createObjectURL(blob);
+        processed.attrs.src = blobUrl;
+      } catch (error) {
+        console.error(`Failed to convert image ID ${src}:`, error);
+        return null;
+      }
+    } else if (src.startsWith("blob:")) {
+      return null;
+    }
+  }
+
+  // Recursively process content
+  if (processed.content) {
+    const processedContent = await Promise.all(
+      processed.content.map((item) => convertImageIdsToBlobs(item, questionId))
+    );
+    processed.content = processedContent.filter(Boolean);
+  }
+
+  return processed;
+};
 
 const UpdateQuestionForm = ({ initialQuestion }) => {
   const [question, setQuestion] = useState(() => {
@@ -38,6 +92,8 @@ const UpdateQuestionForm = ({ initialQuestion }) => {
           content: parsedContent
             ? JSON.stringify(parsedContent)
             : JSON.stringify(getDefaultTipTapContent()),
+          files: [],
+          imageMap: new Map(),
         };
       });
     } else {
@@ -46,6 +102,8 @@ const UpdateQuestionForm = ({ initialQuestion }) => {
         {
           id: `solution_${Date.now()}_0`,
           content: JSON.stringify(getDefaultTipTapContent()),
+          files: [],
+          imageMap: new Map(),
         },
       ];
     }
@@ -61,8 +119,55 @@ const UpdateQuestionForm = ({ initialQuestion }) => {
 
   const [deleteSolutionPopUp, setDeleteSolutionPopUp] = useState(false);
   const [solutionDeleteId, setSolutionDeleteId] = useState(null);
+  const [loadingImages, setLoadingImages] = useState(true);
 
   const { handleUpdateSubmit } = useQuestionHooks(question, initialQuestion);
+
+  // Convert existing image IDs to blob URLs for editing
+  useEffect(() => {
+    const convertExistingImages = async () => {
+      if (
+        !initialQuestion ||
+        !initialQuestion.solutions ||
+        !initialQuestion.id
+      ) {
+        setLoadingImages(false);
+        return;
+      }
+      try {
+        const convertedSolutions = await Promise.all(
+          question.solutions.map(async (solution) => {
+            const parsedContent = parseTipTapContent(solution.content);
+            if (parsedContent) {
+              const cleanedContent =
+                cleanupBlobUrlsFromDatabaseContent(parsedContent);
+              const convertedContent = await convertImageIdsToBlobs(
+                cleanedContent,
+                initialQuestion.id
+              );
+              return {
+                ...solution,
+                content: JSON.stringify(convertedContent),
+              };
+            }
+            return solution;
+          })
+        );
+
+        setQuestion((prev) => ({
+          ...prev,
+          solutions: convertedSolutions,
+        }));
+      } catch (error) {
+        console.error("Error converting existing images:", error);
+      } finally {
+        setLoadingImages(false);
+      }
+    };
+
+    convertExistingImages();
+    // eslint-disable-next-line
+  }, [initialQuestion?.id]);
 
   const difficultyOptions = ["Easy", "Medium", "Hard"];
 
@@ -126,11 +231,25 @@ const UpdateQuestionForm = ({ initialQuestion }) => {
     });
   };
 
-  const handleTipTapContentChange = (content, solutionId) => {
+  const handleTipTapContentChange = (content, solutionId, imageInfo) => {
     setQuestion((prevQuestion) => {
       const updatedSolutions = prevQuestion.solutions.map((solution) => {
         if (solution.id === solutionId) {
-          return { ...solution, content: JSON.stringify(content) };
+          const updatedSolution = {
+            ...solution,
+            content: JSON.stringify(content),
+          };
+
+          if (imageInfo && imageInfo.file) {
+            updatedSolution.files = updatedSolution.files || [];
+            updatedSolution.imageMap = updatedSolution.imageMap || new Map();
+            if (!updatedSolution.imageMap.has(imageInfo.blobUrl)) {
+              updatedSolution.files.push(imageInfo.file);
+              updatedSolution.imageMap.set(imageInfo.blobUrl, imageInfo.file);
+            }
+          }
+
+          return updatedSolution;
         }
         return solution;
       });
@@ -142,6 +261,8 @@ const UpdateQuestionForm = ({ initialQuestion }) => {
     const newSolution = {
       id: `solution_${Date.now()}_${Math.random()}`,
       content: JSON.stringify(getDefaultTipTapContent()),
+      files: [],
+      imageMap: new Map(),
     };
     setQuestion((prevQuestions) => ({
       ...prevQuestions,
@@ -167,6 +288,22 @@ const UpdateQuestionForm = ({ initialQuestion }) => {
       setDeleteSolutionPopUp(false);
     }
   };
+
+  if (loadingImages) {
+    return (
+      <Container
+        maxWidth="md"
+        sx={{ marginBottom: 4, textAlign: "center", mt: 4 }}
+      >
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          Loading existing images for editing...
+        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <div>Loading...</div>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="md" sx={{ marginBottom: 4 }}>
@@ -350,9 +487,9 @@ const UpdateQuestionForm = ({ initialQuestion }) => {
                 }}
                 showDeleteButton={question.solutions.length > 1}
                 content={solution.content}
-                onContentChange={(content) =>
-                  handleTipTapContentChange(content, solution.id)
-                }
+                onContentChange={(content, imageInfo) => {
+                  handleTipTapContentChange(content, solution.id, imageInfo);
+                }}
               />
             ))
           ) : (
@@ -362,9 +499,13 @@ const UpdateQuestionForm = ({ initialQuestion }) => {
               deleteSolution={() => {}}
               showDeleteButton={false}
               content={JSON.stringify(getDefaultTipTapContent())}
-              onContentChange={(content) =>
-                handleTipTapContentChange(content, "default-solution")
-              }
+              onContentChange={(content, imageInfo) => {
+                handleTipTapContentChange(
+                  content,
+                  "default-solution",
+                  imageInfo
+                );
+              }}
             />
           )}
         </Box>

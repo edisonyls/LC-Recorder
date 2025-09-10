@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import CodeIcon from "@mui/icons-material/Code";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import SecurityIcon from "@mui/icons-material/Security";
 import SpaIcon from "@mui/icons-material/Spa";
 import FlashOnIcon from "@mui/icons-material/FlashOn";
