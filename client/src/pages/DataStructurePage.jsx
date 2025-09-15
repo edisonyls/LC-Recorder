@@ -15,6 +15,7 @@ import ContentDisplay from "../components/data_structure_page/ContentDisplay";
 import { DataStructureHooks } from "../hooks/DataStructureHooks";
 import { useDataStructure } from "../context/dataStructureContext";
 import Footer from "../components/Footer";
+import { UserHooks } from "../hooks/userHooks/UserHooks";
 
 const DataStructurePage = () => {
   const { state } = useDataStructure();
@@ -24,6 +25,11 @@ const DataStructurePage = () => {
   const [addClicked, setAddClicked] = useState(false);
   const [content, setContent] = useState(null);
   const { fetchDataStructures } = DataStructureHooks();
+  const { getCurrentUser } = UserHooks();
+
+  useEffect(() => {
+    getCurrentUser();
+  }, []); // eslint-disable-line
 
   useEffect(() => {
     fetchDataStructures();

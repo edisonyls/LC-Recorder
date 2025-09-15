@@ -20,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { useAlgorithm } from "../context/AlgorithmContext";
 import { AlgorithmHooks } from "../hooks/AlgorithmHooks";
 import AlgorithmCard from "../components/algorithm_page_components/AlgorithmCard";
+import { UserHooks } from "../hooks/userHooks/UserHooks";
 
 const AlgorithmPage = () => {
   const [open, setOpen] = useState(false);
@@ -30,6 +31,11 @@ const AlgorithmPage = () => {
   const { state } = useAlgorithm();
   const { algorithms, loading } = state;
   const { fetchAlgorithms, deleteAlgorithm } = AlgorithmHooks();
+  const { getCurrentUser } = UserHooks();
+
+  useEffect(() => {
+    getCurrentUser();
+  }, []); // eslint-disable-line
 
   useEffect(() => {
     fetchAlgorithms();

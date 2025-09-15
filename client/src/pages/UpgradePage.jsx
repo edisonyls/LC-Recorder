@@ -1,5 +1,5 @@
 import { grey } from "@mui/material/colors";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AuthenticatedNavbar from "../components/navbar/AuthenticatedNavbar";
 import {
   Box,
@@ -31,6 +31,7 @@ import { useUser } from "../context/userContext";
 import { axiosInstance } from "../config/axiosConfig";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { UserHooks } from "../hooks/userHooks/UserHooks";
 
 const UpgradePage = () => {
   const [isYearly, setIsYearly] = useState(false);
@@ -43,6 +44,11 @@ const UpgradePage = () => {
   const { state } = useUser();
   const { user } = state;
   const navigate = useNavigate();
+  const { getCurrentUser } = UserHooks();
+
+  useEffect(() => {
+    getCurrentUser();
+  }, []); // eslint-disable-line
 
   const packages = [
     {

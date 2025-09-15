@@ -32,6 +32,7 @@ import { WhiteBackgroundButton } from "../components/generic/GenericButton";
 import GenericSpinner from "../components/generic/GenericSpinner";
 import Footer from "../components/Footer";
 import RandomQuote from "../components/RandomQuote";
+import { UserHooks } from "../hooks/userHooks/UserHooks";
 
 const QuestionDetails = () => {
   const [question, setQuestion] = useState();
@@ -39,6 +40,11 @@ const QuestionDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = location.state || {};
+  const { getCurrentUser } = UserHooks();
+
+  useEffect(() => {
+    getCurrentUser();
+  }, []); // eslint-disable-line
 
   useEffect(() => {
     const fetchData = async () => {

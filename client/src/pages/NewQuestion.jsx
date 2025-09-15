@@ -9,6 +9,7 @@ import Stopwatch from "../components/Stopwatch";
 import { GenericDialog } from "../components/generic/GenericDialog";
 import { ArrowBack } from "@mui/icons-material";
 import UpdateQuestionForm from "../components/new_question/UpdateQuestionForm";
+import { UserHooks } from "../hooks/userHooks/UserHooks";
 
 const NewQuestion = () => {
   const [timeOfCompletion, setTimeOfCompletion] = useState("");
@@ -18,6 +19,11 @@ const NewQuestion = () => {
   const withTimer = location.state?.withTimer || false;
   const question = location.state?.question || null;
   const navigate = useNavigate();
+  const { getCurrentUser } = UserHooks();
+
+  React.useEffect(() => {
+    getCurrentUser();
+  }, []); // eslint-disable-line
 
   const handleTimeSubmit = (time) => {
     setTimeOfCompletion(time);

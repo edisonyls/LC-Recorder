@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Container } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import AuthenticatedNavbar from "../components/navbar/AuthenticatedNavbar";
@@ -7,12 +7,18 @@ import AlgorithmForm from "../components/algorithm_page_components/AlgorithmForm
 import AlgorithmHeader from "../components/algorithm_page_components/AlgorithmHeader";
 import { useLocation } from "react-router-dom";
 import UpdateAlgorithmForm from "../components/algorithm_page_components/UpdateAlgorithmForm";
+import { UserHooks } from "../hooks/userHooks/UserHooks";
 
 const NewAlgorithmPage = () => {
   const [isDataEntered, setDataEntered] = useState(false);
 
   const location = useLocation();
   const algorithm = location.state?.algorithm || null;
+  const { getCurrentUser } = UserHooks();
+
+  useEffect(() => {
+    getCurrentUser();
+  }, []); // eslint-disable-line
 
   return (
     <Box
