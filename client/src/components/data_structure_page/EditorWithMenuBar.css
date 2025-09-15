@@ -49,9 +49,16 @@
 }
 
 .tiptap img {
-  width: 100%;
+  max-width: 100%;
+  width: auto;
+  height: auto;
   max-height: 250px;
   object-fit: contain;
+  border-radius: 4px;
+  border: 1px solid #333333;
+  margin: 8px auto;
+  display: block;
+  cursor: pointer;
 }
 
 .tiptap img.ProseMirror-selectednode {

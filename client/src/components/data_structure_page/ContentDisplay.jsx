@@ -108,7 +108,7 @@ const jsonToHtml = async (node, nodeId) => {
       return text;
     case "image":
       const imageSrc = await fetchImage(node.attrs.src, nodeId);
-      return `<img src="${imageSrc}" alt="image" title="image" style="width: 100%; max-height: 300px; object-fit: contain;"/>`;
+      return `<img src="${imageSrc}" alt="image" title="image" style="max-width: 100%; width: auto; height: auto; max-height: 250px; object-fit: contain; border-radius: 4px; border: 1px solid #333333; margin: 8px auto; display: block; cursor: pointer"/>`;
     default:
       return "";
   }

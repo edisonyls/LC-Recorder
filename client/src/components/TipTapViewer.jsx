@@ -81,10 +81,15 @@ const AuthenticatedImage = ({
       alt="Solution visual"
       style={{
         maxWidth: "100%",
+        width: "auto",
         height: "auto",
         borderRadius: "4px",
         border: "1px solid #333333",
-        margin: "8px 0",
+        margin: "8px auto",
+        display: "block",
+        objectFit: "contain",
+        maxHeight: "250px",
+        cursor: "pointer",
       }}
     />
   );
@@ -316,10 +321,15 @@ const TipTapViewer = ({ content, title, solutionId, questionId }) => {
               alt="Solution visual"
               style={{
                 maxWidth: "100%",
+                width: "auto",
                 height: "auto",
                 borderRadius: "4px",
                 border: "1px solid #333333",
-                margin: "8px 0",
+                margin: "8px auto",
+                display: "block",
+                objectFit: "contain",
+                maxHeight: "250px",
+                cursor: "pointer",
               }}
             />
           );
