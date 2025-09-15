@@ -1,6 +1,5 @@
 package com.yls.ylslc.data_structure;
 
-import com.yls.ylslc.node.NodeDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +16,6 @@ import java.util.UUID;
 public class DataStructureDto {
     private UUID id;
     private String name;
-    private List<NodeDto> nodes;
+    private List<DataStructureNode> contentTree;
     private LocalDateTime createdAt;
 }
