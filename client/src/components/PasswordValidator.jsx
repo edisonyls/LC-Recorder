@@ -1,7 +1,9 @@
 import { List, ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import React from "react";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import {
+  CheckCircleOutline as CheckCircleOutlineIcon,
+  ErrorOutline as ErrorOutlineIcon,
+} from "@mui/icons-material";
 
 const PasswordValidator = ({ password }) => {
   const isLengthValid = password.length >= 8 && password.length <= 16;

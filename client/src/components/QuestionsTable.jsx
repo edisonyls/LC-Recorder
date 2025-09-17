@@ -15,13 +15,16 @@ import {
   useTheme,
   Tooltip,
 } from "@mui/material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
-import DeleteIcon from "@mui/icons-material/Delete";
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import TimerIcon from "@mui/icons-material/Timer";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+
+import {
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Delete as DeleteIcon,
+  Star as StarIcon,
+  StarBorder as StarBorderIcon,
+  Timer as TimerIcon,
+  CalendarToday as CalendarTodayIcon,
+} from "@mui/icons-material";
 
 function QuestionsTable({ questions, onDelete, onToggleStar }) {
   const navigate = useNavigate();

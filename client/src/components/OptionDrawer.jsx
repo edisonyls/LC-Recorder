@@ -13,13 +13,15 @@ import {
   IconButton,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import LogoutIcon from "@mui/icons-material/ExitToApp";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import DataStructureIcon from "@mui/icons-material/Storage";
-import CodeIcon from "@mui/icons-material/Code";
-import PolylineIcon from "@mui/icons-material/Polyline";
-import CloseIcon from "@mui/icons-material/Close";
+import {
+  AccountCircle as AccountCircleIcon,
+  Logout as LogoutIcon,
+  Dashboard as DashboardIcon,
+  Storage as StorageIcon,
+  Code as CodeIcon,
+  Polyline as PolylineIcon,
+  Close as CloseIcon,
+} from "@mui/icons-material";
 import UserBadge from "./UserBadge";
 import { PrimaryButton } from "./generic/GenericButton";
 
@@ -50,7 +52,7 @@ const OptionDrawer = ({
     },
     {
       text: "Data Structure",
-      icon: <DataStructureIcon />,
+      icon: <StorageIcon />,
       path: "/data-structure",
       onClick: () => navigate("/data-structure"),
       roles: ["PREPLUS", "ADMIN"],

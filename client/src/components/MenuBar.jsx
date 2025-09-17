@@ -11,23 +11,25 @@ import {
   CircularProgress,
   Popover,
 } from "@mui/material";
-import PaletteIcon from "@mui/icons-material/Palette";
-import FormatBoldIcon from "@mui/icons-material/FormatBold";
-import FormatItalicIcon from "@mui/icons-material/FormatItalic";
-import StrikethroughSIcon from "@mui/icons-material/StrikethroughS";
-import CodeIcon from "@mui/icons-material/Code";
-import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
-import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
-import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
-import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
-import ImageIcon from "@mui/icons-material/Image";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import SaveIcon from "@mui/icons-material/Save";
-import CloseIcon from "@mui/icons-material/Close";
+import {
+  Palette as PaletteIcon,
+  FormatBold as FormatBoldIcon,
+  FormatItalic as FormatItalicIcon,
+  StrikethroughS as StrikethroughSIcon,
+  Code as CodeIcon,
+  FormatListBulleted as FormatListBulletedIcon,
+  FormatListNumbered as FormatListNumberedIcon,
+  FormatQuote as FormatQuoteIcon,
+  HorizontalRule as HorizontalRuleIcon,
+  Image as ImageIcon,
+  KeyboardArrowDown as KeyboardArrowDownIcon,
+  Save as SaveIcon,
+  Close as CloseIcon,
+  DataArray as DataArrayIcon,
+} from "@mui/icons-material";
 import { grey } from "@mui/material/colors";
 import { WarningDialog } from "./data_structure_page/DataStructureDialogs";
 import { ContentHooks } from "../hooks/ContentHooks";
-import DataArrayIcon from "@mui/icons-material/DataArray";
 
 const MenuBar = ({
   onClose,
