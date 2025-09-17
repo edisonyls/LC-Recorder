@@ -42,7 +42,6 @@ import { grey } from "@mui/material/colors";
 import { ActionDialog, WarningDialog } from "./DataStructureDialogs";
 import { DataStructureHooks } from "../../hooks/DataStructureHooks";
 import { NodeHooks } from "../../hooks/NodeHooks";
-import { hasContentInSubtree } from "../../utils/dataStructureTreeUtils";
 
 const DataStructureSidebar = ({
   dataStructures,
@@ -293,6 +292,18 @@ const DataStructureSidebar = ({
     } else if (type === "node") {
       onNodeSelect(item);
     }
+  };
+
+  const hasContentInSubtree = (node) => {
+    if (node.content && node.content.trim() !== "") {
+      return true;
+    }
+
+    if (node.children && node.children.length > 0) {
+      return node.children.some(hasContentInSubtree);
+    }
+
+    return false;
   };
 
   // Render node tree recursively

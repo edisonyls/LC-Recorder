@@ -28,7 +28,7 @@
 }
 
 .tiptap code {
-  background-color: #fff;
+  background-color: red;
   color: black;
   padding: 2px 4px; /* Add padding to the code element */
 }

@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import "./data_structure_page/EditorWithMenuBar.css";
+import { useState } from "react";
 import { useCurrentEditor } from "@tiptap/react";
 import { GithubPicker } from "react-color";
 import {
@@ -11,27 +10,25 @@ import {
   CircularProgress,
   Popover,
 } from "@mui/material";
-import {
-  Palette as PaletteIcon,
-  FormatBold as FormatBoldIcon,
-  FormatItalic as FormatItalicIcon,
-  StrikethroughS as StrikethroughSIcon,
-  Code as CodeIcon,
-  FormatListBulleted as FormatListBulletedIcon,
-  FormatListNumbered as FormatListNumberedIcon,
-  FormatQuote as FormatQuoteIcon,
-  HorizontalRule as HorizontalRuleIcon,
-  Image as ImageIcon,
-  KeyboardArrowDown as KeyboardArrowDownIcon,
-  Save as SaveIcon,
-  Close as CloseIcon,
-  DataArray as DataArrayIcon,
-} from "@mui/icons-material";
+import PaletteIcon from "@mui/icons-material/Palette";
+import FormatBoldIcon from "@mui/icons-material/FormatBold";
+import FormatItalicIcon from "@mui/icons-material/FormatItalic";
+import StrikethroughSIcon from "@mui/icons-material/StrikethroughS";
+import CodeIcon from "@mui/icons-material/Code";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
+import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
+import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
+import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
+import ImageIcon from "@mui/icons-material/Image";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import SaveIcon from "@mui/icons-material/Save";
+import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
-import { WarningDialog } from "./data_structure_page/DataStructureDialogs";
-import { ContentHooks } from "../hooks/ContentHooks";
+import { WarningDialog } from "./DataStructureDialogs";
+import { ContentHooks } from "../../hooks/ContentHooks";
+import DataArrayIcon from "@mui/icons-material/DataArray";
 
-const MenuBar = ({
+const DataStructureMenuBar = ({
   onClose,
   selectedNode,
   setAddClicked,
@@ -50,51 +47,56 @@ const MenuBar = ({
   const open = Boolean(anchorEl);
 
   // TODO: DELETING THE EXISTING IMAGE AND RE-UPLOADING THE SAME IMAGES TO S3 IS VERY IN-EFFICIENT.
-  // I IGNORED IT FOR NOW
-  const UploadContent = async () => {
-    if (editor && selectedNode) {
-      const contentJsonObject = editor.getJSON();
-      // checking if user has entered anything
-      const isEmpty = contentJsonObject.content.every((node) => {
-        return (
-          node.type === "paragraph" &&
-          (!node.content || node.content.length === 0)
-        );
-      });
-      if (isEmpty) {
-        setEmptyContentOpen(true);
-        return;
-      } else {
-        setLoading(true);
-        const imageSrcs = [];
+  // TODO: NEED TO IMPLEMENT A MORE SOPHISTICATED STRATEGY FOR HANDLING IMAGES.
+  // TODO: CURRENT IMPLEMENTATION IS ONLY FOR DEMONSTRATION PURPOSES AND NOT FOR PRODUCTION.
 
-        if (content !== null && content !== undefined) {
-          for (const node of JSON.parse(content).content) {
-            if (node.type === "image") {
-              imageSrcs.push(node.attrs.src);
-            }
-          }
-        }
-        for (const node of contentJsonObject.content) {
-          if (node.type === "image") {
-            const blobUrl = node.attrs.src;
-            const imageFile = await convertBlobUrlToFile(blobUrl);
-            const imageId = await uploadImageToBackend(
-              imageFile,
-              selectedNode.id
-            );
-            node.attrs.src = imageId;
-          }
-        }
+  const UploadContent = async () => {
+    setLoading(true);
+    try {
+      const htmlContent = editor.getHTML();
+
+      if (htmlContent === "<p></p>") {
+        setEmptyContentOpen(true);
         setLoading(false);
-        handleSave(
-          selectedNode.id,
-          JSON.stringify(contentJsonObject),
-          selectedStructureId,
-          imageSrcs
-        );
-        setAddClicked(false);
+        return;
       }
+
+      const doc = new DOMParser().parseFromString(htmlContent, "text/html");
+      const images = doc.querySelectorAll("img");
+      let updatedContent = htmlContent;
+
+      for (const img of images) {
+        const src = img.getAttribute("src");
+        if (src && src.startsWith("blob:")) {
+          try {
+            const file = await convertBlobUrlToFile(src);
+            if (file) {
+              const imageId = await uploadImageToBackend(
+                file,
+                selectedStructureId,
+                selectedNode.id
+              );
+              if (imageId) {
+                updatedContent = updatedContent.replace(src, imageId);
+              }
+            }
+          } catch (error) {
+            console.error("Error processing image:", error);
+          }
+        }
+      }
+
+      await handleSave(
+        selectedStructureId,
+        selectedNode.id,
+        updatedContent,
+        content
+      );
+      setAddClicked(false);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error uploading content:", error);
+      setLoading(false);
     }
   };
 
@@ -150,12 +152,13 @@ const MenuBar = ({
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
-
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      editor.chain().focus().setImage({ src: imageUrl }).run();
-    } else {
-      alert("Please select an image file.");
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageSrc = e.target.result;
+        editor.chain().focus().setImage({ src: imageSrc }).run();
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -165,40 +168,50 @@ const MenuBar = ({
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
+        backgroundColor: grey[800],
+        p: 1,
+        borderBottom: "1px solid #ccc",
       }}
     >
-      {dialogOpen && (
-        <WarningDialog
-          dialogOpen={dialogOpen}
-          title="Are you sure?"
-          text="All your input will be lost."
-          optionNumber={2}
-          onClose={onClose}
-          onCancel={() => setDialogOpen(false)}
-        />
-      )}
-      {emptyContentOpen && (
-        <WarningDialog
-          dialogOpen={emptyContentOpen}
-          title="Empty Content!"
-          text="You have not yet entered anything in the editor."
-          onClose={() => setEmptyContentOpen(false)}
-        />
-      )}
-      <Box>
-        {/* <Box sx={{ display: "flex", alignItems: "center" }}> */}
-        {/* <Typography variant="body1">{getCurrentHeadingLevel()}</Typography> */}
-        <IconButton aria-label="formatting-options" onClick={handleMenuClick}>
-          <KeyboardArrowDownIcon style={{ color: grey[900] }} />
-        </IconButton>
-        {/* </Box> */}
+      <WarningDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onConfirm={() => {
+          setDialogOpen(false);
+          onClose();
+        }}
+        title="Discard Changes"
+        content="Are you sure you want to discard your changes? This action cannot be undone."
+      />
 
+      <WarningDialog
+        open={emptyContentOpen}
+        onClose={() => setEmptyContentOpen(false)}
+        onConfirm={() => setEmptyContentOpen(false)}
+        title="Empty Content"
+        content="Cannot save empty content. Please add some content before saving."
+        showCancelButton={false}
+      />
+
+      <Box>
+        <Tooltip title="Text Style">
+          <IconButton
+            onClick={handleMenuClick}
+            style={{ color: grey[50] }}
+            endIcon={<KeyboardArrowDownIcon />}
+          >
+            {getCurrentHeadingLevel()}
+            <KeyboardArrowDownIcon />
+          </IconButton>
+        </Tooltip>
         <Menu
           anchorEl={anchorEl}
           open={open}
-          onClose={() => handleMenuClose("")}
+          onClose={() => setAnchorEl(null)}
+          MenuListProps={{
+            "aria-labelledby": "basic-button",
+          }}
           sx={{
-            padding: 0,
             "& .MuiDialog-paper": { bgcolor: grey[900], color: grey[50] },
           }}
         >
@@ -252,6 +265,7 @@ const MenuBar = ({
             <FormatBoldIcon />
           </IconButton>
         </Tooltip>
+
         <Tooltip title="Italic">
           <IconButton
             onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -272,7 +286,7 @@ const MenuBar = ({
           </IconButton>
         </Tooltip>
 
-        <Tooltip title="Code">
+        <Tooltip title="Inline Code">
           <IconButton
             onClick={() => editor.chain().focus().toggleCode().run()}
             disabled={!editor.can().chain().focus().toggleCode().run()}
@@ -294,7 +308,7 @@ const MenuBar = ({
           </IconButton>
         </Tooltip>
 
-        <Tooltip title="Ordered List">
+        <Tooltip title="Numbered List">
           <IconButton
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
             disabled={!editor.can().chain().focus().toggleOrderedList().run()}
@@ -396,4 +410,4 @@ const customColors = [
   "#FF5722", // deep orange
 ];
 
-export default MenuBar;
+export default DataStructureMenuBar;
