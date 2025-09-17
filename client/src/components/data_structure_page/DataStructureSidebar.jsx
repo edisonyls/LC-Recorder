@@ -245,10 +245,11 @@ const DataStructureSidebar = ({
         default:
           break;
       }
+      handleDialogClose();
     } catch (error) {
       console.error("Operation failed:", error);
+      // Don't close dialog on error, let user retry or cancel
     }
-    handleDialogClose();
   };
 
   const handleMenuClick = (event, type, itemId, parentId = null) => {
@@ -692,14 +693,16 @@ const DataStructureSidebar = ({
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={() => setAnchorEl(null)}
-        sx={{
-          bgcolor: grey[900],
-          border: `1px solid ${grey[700]}`,
-          "& .MuiMenuItem-root": {
-            color: grey[200],
-            fontSize: "0.875rem",
-            "&:hover": {
-              bgcolor: alpha(grey[700], 0.3),
+        PaperProps={{
+          sx: {
+            bgcolor: grey[900],
+            border: `1px solid ${grey[700]}`,
+            "& .MuiMenuItem-root": {
+              color: grey[200],
+              fontSize: "0.875rem",
+              "&:hover": {
+                bgcolor: alpha(grey[700], 0.3),
+              },
             },
           },
         }}
@@ -765,8 +768,12 @@ const DataStructureSidebar = ({
       />
 
       <WarningDialog
-        open={warningDialogOpen}
+        dialogOpen={warningDialogOpen}
         onClose={() => setWarningDialogOpen(false)}
+        onCancel={() => setWarningDialogOpen(false)}
+        title="Unsaved Changes"
+        text="You have unsaved changes. Please save or discard them before switching to another page."
+        optionNumber={1}
       />
 
       {/* Resize Handle */}
