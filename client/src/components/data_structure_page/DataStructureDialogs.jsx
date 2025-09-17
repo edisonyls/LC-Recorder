@@ -16,12 +16,15 @@ export const ActionDialog = ({
   onClose,
   actionType,
   structureName,
+  title,
   newName,
   setNewName,
   onSubmit,
+  isDelete,
+  itemName,
 }) => {
-  const dialogTitle = `${actionType} ${structureName}`;
-  const inputLabel = `Name of ${structureName}`;
+  const dialogTitle = title || `${actionType} ${structureName || ""}`.trim();
+  const inputLabel = structureName ? `Name of ${structureName}` : "Name";
 
   return (
     <Dialog
@@ -30,15 +33,32 @@ export const ActionDialog = ({
       maxWidth="xs"
       fullWidth={true}
       sx={{
-        "& .MuiPaper-root": { backgroundColor: grey[50] },
-        "& .MuiTypography-root, & .MuiInputBase-input, & .MuiButton-root": {
-          color: grey[900],
+        "& .MuiPaper-root": { backgroundColor: grey[900] },
+        "& .MuiTypography-root, & .MuiInputBase-input": {
+          color: grey[50],
+        },
+        "& .MuiInputLabel-root": {
+          color: grey[50],
+        },
+        "& .MuiOutlinedInput-root": {
+          "& fieldset": {
+            borderColor: grey[600],
+          },
+          "&:hover fieldset": {
+            borderColor: grey[400],
+          },
+          "&.Mui-focused fieldset": {
+            borderColor: grey[300],
+          },
         },
       }}
     >
       <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent>
-        {(actionType === "Add" || actionType === "Rename") && (
+        {(actionType === "Add" ||
+          actionType === "Rename" ||
+          (actionType &&
+            (actionType.includes("Add") || actionType.includes("Rename")))) && (
           <TextField
             autoFocus
             margin="dense"
@@ -50,22 +70,45 @@ export const ActionDialog = ({
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             InputLabelProps={{
-              style: { color: grey[900] },
+              style: { color: grey[50] },
             }}
             inputProps={{
-              style: { color: grey[900] },
+              style: { color: grey[50] },
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: grey[600],
+                },
+                "&:hover fieldset": {
+                  borderColor: grey[400],
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: grey[300],
+                },
+              },
             }}
           />
         )}
-        {actionType === "Delete" && (
-          <Typography>Caution! All the data will be deleted.</Typography>
+        {(actionType === "Delete" ||
+          (actionType && actionType.includes("Delete"))) && (
+          <Typography>
+            {isDelete && itemName
+              ? `Are you sure you want to delete "${itemName}"? This action cannot be undone.`
+              : "Caution! All the data will be deleted."}
+          </Typography>
         )}
       </DialogContent>
       <DialogActions>
         <LightGreyBackgroundButton onClick={onClose} buttonText="Cancel" />
         <LightGreyBackgroundButton
           onClick={onSubmit}
-          buttonText={actionType === "Delete" ? "Delete" : "Save"}
+          buttonText={
+            actionType === "Delete" ||
+            (actionType && actionType.includes("Delete"))
+              ? "Delete"
+              : "Save"
+          }
         />
       </DialogActions>
     </Dialog>
@@ -84,9 +127,9 @@ export const ContentDialog = ({
       open={isOpen}
       onClose={onClose}
       sx={{
-        "& .MuiPaper-root": { backgroundColor: grey[50] },
-        "& .MuiTypography-root, & .MuiInputBase-input, & .MuiButton-root": {
-          color: grey[900],
+        "& .MuiPaper-root": { backgroundColor: grey[900] },
+        "& .MuiTypography-root": {
+          color: grey[50],
         },
       }}
     >
@@ -117,9 +160,9 @@ export const WarningDialog = ({
       maxWidth="xs"
       fullWidth={true}
       sx={{
-        "& .MuiPaper-root": { backgroundColor: grey[50] },
-        "& .MuiTypography-root, & .MuiInputBase-input, & .MuiButton-root": {
-          color: grey[900],
+        "& .MuiPaper-root": { backgroundColor: grey[900] },
+        "& .MuiTypography-root": {
+          color: grey[50],
         },
       }}
     >
