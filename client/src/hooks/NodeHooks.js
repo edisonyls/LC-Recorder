@@ -5,19 +5,21 @@ import { actionTypes } from "../reducer/dataStructureActions";
 export const NodeHooks = () => {
   const { dispatch } = useDataStructure();
 
-  const addNode = async (selectedStructureId, name) => {
+  const addNode = async (dataStructureId, name, parentNodeId = null) => {
     dispatch({ type: actionTypes.PROCESS_START });
     try {
-      const response = await axiosInstance.post(`node/${selectedStructureId}`, {
+      const url = parentNodeId 
+        ? `data-structure/${dataStructureId}/node?parentNodeId=${parentNodeId}`
+        : `data-structure/${dataStructureId}/node`;
+      
+      const response = await axiosInstance.post(url, {
         name,
-        contents: [],
+        content: "",
       });
+      
       dispatch({
-        type: actionTypes.ADD_NODE,
-        payload: {
-          dataStructureId: selectedStructureId,
-          node: response.data.data,
-        },
+        type: actionTypes.UPDATE_DATA_STRUCTURE_SUCCESS,
+        payload: response.data.data,
       });
     } catch (error) {
       dispatch({
@@ -28,38 +30,33 @@ export const NodeHooks = () => {
     }
   };
 
-  const renameNode = async (dataStructureId, nodeId, newName) => {
+  const updateNode = async (dataStructureId, nodeId, name, content) => {
     dispatch({ type: actionTypes.PROCESS_START });
     try {
-      const response = await axiosInstance.patch(`node/${nodeId}`, {
-        name: newName,
+      const response = await axiosInstance.put(`data-structure/${dataStructureId}/node/${nodeId}`, {
+        name,
+        content,
       });
       dispatch({
-        type: actionTypes.RENAME_NODE,
-        payload: {
-          dataStructureId,
-          node: response.data.data,
-        },
+        type: actionTypes.UPDATE_DATA_STRUCTURE_SUCCESS,
+        payload: response.data.data,
       });
     } catch (error) {
       dispatch({
         type: actionTypes.PROCESS_FAILURE,
         error: error,
       });
-      console.error("Failed to rename the node: ", error);
+      console.error("Failed to update the node: ", error);
     }
   };
 
   const deleteNode = async (dataStructureId, nodeId) => {
     dispatch({ type: actionTypes.PROCESS_START });
     try {
-      const response = await axiosInstance.delete(`node/${nodeId}`);
+      const response = await axiosInstance.delete(`data-structure/${dataStructureId}/node/${nodeId}`);
       dispatch({
-        type: actionTypes.DELETE_NODE,
-        payload: {
-          dataStructureId,
-          node: response.data.data,
-        },
+        type: actionTypes.UPDATE_DATA_STRUCTURE_SUCCESS,
+        payload: response.data.data,
       });
     } catch (error) {
       dispatch({
@@ -70,5 +67,48 @@ export const NodeHooks = () => {
     }
   };
 
-  return { addNode, renameNode, deleteNode };
+  const getNode = async (dataStructureId, nodeId) => {
+    try {
+      const response = await axiosInstance.get(`data-structure/${dataStructureId}/node/${nodeId}`);
+      return response.data.data;
+    } catch (error) {
+      console.error("Failed to get the node: ", error);
+      return null;
+    }
+  };
+
+  const uploadNodeImage = async (dataStructureId, nodeId, imageFile) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", imageFile);
+      
+      const response = await axiosInstance.post(
+        `data-structure/${dataStructureId}/node/${nodeId}/upload-image`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return response.data.data; // Returns the imageId
+    } catch (error) {
+      console.error("Failed to upload image: ", error);
+      throw error;
+    }
+  };
+
+  const deleteNodeImage = async (dataStructureId, nodeId, imageId) => {
+    try {
+      const response = await axiosInstance.delete(
+        `data-structure/${dataStructureId}/node/${nodeId}/image/${imageId}`
+      );
+      return response.data.data;
+    } catch (error) {
+      console.error("Failed to delete image: ", error);
+      throw error;
+    }
+  };
+
+  return { addNode, updateNode, deleteNode, getNode, uploadNodeImage, deleteNodeImage };
 };

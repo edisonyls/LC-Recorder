@@ -34,89 +34,25 @@ export function dataStructureReducer(state, action) {
         loading: false,
         error: null,
       };
+    case actionTypes.UPDATE_DATA_STRUCTURE_SUCCESS:
+      const updatedDataStructuresForUpdate = state.dataStructures.map((ds) => {
+        if (ds.id === action.payload.id) {
+          return action.payload;
+        }
+        return ds;
+      });
+      return {
+        ...state,
+        dataStructures: updatedDataStructuresForUpdate,
+        loading: false,
+        error: null,
+      };
     case actionTypes.DELETE_DATA_STRUCTURE:
       return {
         ...state,
         dataStructures: state.dataStructures.filter(
           (ds) => ds.id !== action.payload.id
         ),
-        loading: false,
-        error: null,
-      };
-    case actionTypes.ADD_NODE:
-      return {
-        ...state,
-        dataStructures: state.dataStructures.map((dataStructure) => {
-          if (dataStructure.id === action.payload.dataStructureId) {
-            return {
-              ...dataStructure,
-              nodes: [...dataStructure.nodes, action.payload.node],
-            };
-          }
-          return dataStructure;
-        }),
-        loading: false,
-        error: null,
-      };
-    case actionTypes.RENAME_NODE:
-      return {
-        ...state,
-        dataStructures: state.dataStructures.map((dataStructure) => {
-          if (dataStructure.id === action.payload.dataStructureId) {
-            // Found the parent dataStructure, now find and update the node
-            const updatedNodes = dataStructure.nodes.map((node) => {
-              if (node.id === action.payload.node.id) {
-                return {
-                  ...node,
-                  name: action.payload.node.name,
-                };
-              }
-              return node;
-            });
-            return { ...dataStructure, nodes: updatedNodes };
-          }
-          return dataStructure;
-        }),
-        loading: false,
-        error: null,
-      };
-    case actionTypes.DELETE_NODE:
-      return {
-        ...state,
-        dataStructures: state.dataStructures.map((dataStructure) => {
-          if (dataStructure.id === action.payload.dataStructureId) {
-            const updatedNodes = dataStructure.nodes.filter(
-              (node) => node.id !== action.payload.node.id
-            );
-            return {
-              ...dataStructure,
-              nodes: updatedNodes,
-            };
-          }
-          return dataStructure;
-        }),
-        loading: false,
-        error: null,
-      };
-    case actionTypes.UPDATE_CONTENT:
-      return {
-        ...state,
-        dataStructures: state.dataStructures.map((dataStructure) => {
-          if (dataStructure.id === action.payload.dataStructureId) {
-            // Found the parent dataStructure, now find and update the node
-            const updatedNodes = dataStructure.nodes.map((node) => {
-              if (node.id === action.payload.node.id) {
-                return {
-                  ...node,
-                  content: action.payload.node.content,
-                };
-              }
-              return node;
-            });
-            return { ...dataStructure, nodes: updatedNodes };
-          }
-          return dataStructure;
-        }),
         loading: false,
         error: null,
       };
