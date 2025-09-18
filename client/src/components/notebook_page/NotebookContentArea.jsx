@@ -202,8 +202,8 @@ const NotebookContentArea = ({
             lineHeight: 1.6,
           }}
         >
-          Select a page from the sidebar to start exploring and editing your
-          hierarchical content, or create a new one to get started.
+          Select a notebook from the sidebar to view your notes, or create a new
+          one to start organizing your coding journey.
         </Typography>
       </Box>
     );
