@@ -175,13 +175,6 @@ const NotebookContentArea = ({
           bgcolor: "#0a0a0a",
         }}
       >
-        <DataObjectIcon
-          sx={{
-            fontSize: 80,
-            color: grey[700],
-            mb: 3,
-          }}
-        />
         <Typography
           variant="h4"
           sx={{
@@ -231,7 +224,6 @@ const NotebookContentArea = ({
           }}
         >
           <Stack direction="row" alignItems="center" spacing={2}>
-            <AccountTreeIcon sx={{ color: grey[400], fontSize: 28 }} />
             <Box sx={{ flex: 1 }}>
               <Typography
                 variant="h4"
@@ -245,7 +237,7 @@ const NotebookContentArea = ({
               </Typography>
               <Stack direction="row" alignItems="center" spacing={2}>
                 <Chip
-                  label={`${nodeCount} nodes`}
+                  label={`${nodeCount} pages`}
                   size="small"
                   sx={{
                     bgcolor: alpha(grey[600], 0.3),

@@ -436,7 +436,6 @@ const NotebookSidebar = ({
         }}
       >
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-          <AccountTreeIcon sx={{ color: grey[400], fontSize: 20 }} />
           <Typography
             variant="h6"
             sx={{
