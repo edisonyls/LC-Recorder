@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Drawer,
   List,
@@ -19,7 +18,6 @@ import {
   Dashboard as DashboardIcon,
   Storage as StorageIcon,
   Code as CodeIcon,
-  Polyline as PolylineIcon,
   Close as CloseIcon,
 } from "@mui/icons-material";
 import UserBadge from "./UserBadge";
@@ -55,13 +53,6 @@ const OptionDrawer = ({
       icon: <StorageIcon />,
       path: "/data-structure",
       onClick: () => navigate("/data-structure"),
-      roles: ["PREPLUS", "ADMIN"],
-    },
-    {
-      text: "Algorithm",
-      icon: <PolylineIcon />,
-      path: "/algorithm",
-      onClick: () => navigate("/algorithm"),
       roles: ["PREPLUS", "ADMIN"],
     },
     {

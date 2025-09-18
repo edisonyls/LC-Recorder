@@ -15,7 +15,6 @@ import { UserHooks } from "../hooks/userHooks/UserHooks";
 import Welcome from "../components/dashboard_page/Welcome";
 import LeetCodeStats from "../components/dashboard_page/LeetCodeStats";
 import DataStructureStats from "../components/dashboard_page/DataStructureStats";
-import AlgorithmStats from "../components/dashboard_page/AlgorithmStats";
 import { grey } from "@mui/material/colors";
 import { axiosInstance } from "../config/axiosConfig";
 import moment from "moment";
@@ -272,7 +271,7 @@ const Dashboard = () => {
             }}
           >
             <LeetCodeStats userId={user.id} stats={stats} />
-            {/* Only show Data Structure and Algorithm Stats for PREPLUS and ADMIN users */}
+            {/* Only show Data Structure for PREPLUS and ADMIN users */}
             {(user.role === "PREPLUS" || user.role === "ADMIN") && (
               <Box
                 sx={{
@@ -283,7 +282,6 @@ const Dashboard = () => {
                 }}
               >
                 <DataStructureStats userId={user.id} />
-                <AlgorithmStats />
               </Box>
             )}
           </Box>
