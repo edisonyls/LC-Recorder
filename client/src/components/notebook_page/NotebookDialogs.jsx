@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +14,7 @@ export const ActionDialog = ({
   open,
   onClose,
   actionType,
-  structureName,
+  notebookName,
   title,
   newName,
   setNewName,
@@ -23,8 +22,8 @@ export const ActionDialog = ({
   isDelete,
   itemName,
 }) => {
-  const dialogTitle = title || `${actionType} ${structureName || ""}`.trim();
-  const inputLabel = structureName ? `Name of ${structureName}` : "Name";
+  const dialogTitle = title || `${actionType} ${notebookName || ""}`.trim();
+  const inputLabel = notebookName ? `Name of ${notebookName}` : "Name";
 
   return (
     <Dialog

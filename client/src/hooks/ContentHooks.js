@@ -1,9 +1,9 @@
 import { axiosInstance } from "../config/axiosConfig";
-import { useDataStructure } from "../context/dataStructureContext";
-import { actionTypes } from "../reducer/dataStructureActions";
+import { useNotebook } from "../context/notebookContext";
+import { actionTypes } from "../reducer/notebookActions";
 
 export const ContentHooks = () => {
-  const { dispatch } = useDataStructure();
+  const { dispatch } = useNotebook();
 
   async function convertBlobUrlToFile(blobUrl) {
     const response = await fetch(blobUrl);
@@ -33,12 +33,7 @@ export const ContentHooks = () => {
     await axiosInstance.delete(`node/image/${nodeId}/${imageId}`);
   };
 
-  const handleSave = async (
-    nodeId,
-    stringContent,
-    dataStructureId,
-    imageSrcs
-  ) => {
+  const handleSave = async (nodeId, stringContent, notebookId, imageSrcs) => {
     dispatch({ type: actionTypes.PROCESS_START });
     try {
       const response = await axiosInstance.patch(`node/content/${nodeId}`, {
@@ -58,7 +53,7 @@ export const ContentHooks = () => {
       dispatch({
         type: actionTypes.UPDATE_CONTENT,
         payload: {
-          dataStructureId,
+          notebookId,
           node: response.data.data,
         },
       });

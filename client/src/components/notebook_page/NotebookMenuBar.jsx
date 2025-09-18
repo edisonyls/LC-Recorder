@@ -24,15 +24,15 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import { grey } from "@mui/material/colors";
-import { WarningDialog } from "./DataStructureDialogs";
+import { WarningDialog } from "./NotebookDialogs";
 import { ContentHooks } from "../../hooks/ContentHooks";
 import DataArrayIcon from "@mui/icons-material/DataArray";
 
-const DataStructureMenuBar = ({
+const NotebookMenuBar = ({
   onClose,
   selectedNode,
   setAddClicked,
-  selectedStructureId,
+  selectedNotebookId,
   content,
 }) => {
   const { handleSave, convertBlobUrlToFile, uploadImageToBackend } =
@@ -73,7 +73,7 @@ const DataStructureMenuBar = ({
             if (file) {
               const imageId = await uploadImageToBackend(
                 file,
-                selectedStructureId,
+                selectedNotebookId,
                 selectedNode.id
               );
               if (imageId) {
@@ -87,7 +87,7 @@ const DataStructureMenuBar = ({
       }
 
       await handleSave(
-        selectedStructureId,
+        selectedNotebookId,
         selectedNode.id,
         updatedContent,
         content
@@ -410,4 +410,4 @@ const customColors = [
   "#FF5722", // deep orange
 ];
 
-export default DataStructureMenuBar;
+export default NotebookMenuBar;

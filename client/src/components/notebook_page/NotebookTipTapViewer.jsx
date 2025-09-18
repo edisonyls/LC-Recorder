@@ -3,9 +3,9 @@ import { Paper, Typography, Box } from "@mui/material";
 import { parseTipTapContent } from "../../utils/tipTapContentParser";
 import { axiosInstance } from "../../config/axiosConfig";
 
-const AuthenticatedDataStructureImage = ({
+const AuthenticatedNotebookImage = ({
   imageId,
-  dataStructureId,
+  notebookId,
   nodeId,
   fetchAuthenticatedImage,
 }) => {
@@ -31,7 +31,7 @@ const AuthenticatedDataStructureImage = ({
     };
 
     loadImage();
-  }, [imageId, dataStructureId, nodeId, fetchAuthenticatedImage]);
+  }, [imageId, notebookId, nodeId, fetchAuthenticatedImage]);
 
   if (loading) {
     return (
@@ -78,7 +78,7 @@ const AuthenticatedDataStructureImage = ({
   return (
     <img
       src={imageSrc}
-      alt="Data structure visual"
+      alt="Notebook visual"
       style={{
         maxWidth: "100%",
         width: "auto",
@@ -95,27 +95,27 @@ const AuthenticatedDataStructureImage = ({
   );
 };
 
-// Global cache for data structure images
-const globalDataStructureImageCache = new Map();
+// Global cache for notebook images
+const globalNotebookImageCache = new Map();
 
-const DataStructureTipTapViewer = ({
+const NotebookTipTapViewer = ({
   content,
   title,
-  dataStructureId,
+  notebookId,
   nodeId,
   sx = {},
 }) => {
   const fetchAuthenticatedImage = async (imageId) => {
-    const cacheKey = `${dataStructureId}-${nodeId}-${imageId}`;
+    const cacheKey = `${notebookId}-${nodeId}-${imageId}`;
 
-    if (globalDataStructureImageCache.has(cacheKey)) {
-      const cachedUrl = globalDataStructureImageCache.get(cacheKey);
+    if (globalNotebookImageCache.has(cacheKey)) {
+      const cachedUrl = globalNotebookImageCache.get(cacheKey);
       return cachedUrl;
     }
 
     try {
       const response = await axiosInstance.get(
-        `/data-structure/${dataStructureId}/node/${nodeId}/image/${imageId}`,
+        `/notebook/${notebookId}/node/${nodeId}/image/${imageId}`,
         {
           responseType: "blob",
         }
@@ -124,10 +124,10 @@ const DataStructureTipTapViewer = ({
       const blobUrl = URL.createObjectURL(blob);
 
       // Store in global cache
-      globalDataStructureImageCache.set(cacheKey, blobUrl);
+      globalNotebookImageCache.set(cacheKey, blobUrl);
       return blobUrl;
     } catch (error) {
-      console.error(`Failed to fetch data structure image ${imageId}:`, error);
+      console.error(`Failed to fetch notebook image ${imageId}:`, error);
       return null;
     }
   };
@@ -325,7 +325,7 @@ const DataStructureTipTapViewer = ({
           return (
             <img
               src={imageSrc}
-              alt="Data structure visual"
+              alt="Notebook visual"
               style={{
                 maxWidth: "100%",
                 width: "auto",
@@ -340,12 +340,11 @@ const DataStructureTipTapViewer = ({
               }}
             />
           );
-        } else if (imageSrc && dataStructureId && nodeId) {
-          // Handle data structure images
+        } else if (imageSrc && notebookId && nodeId) {
           return (
-            <AuthenticatedDataStructureImage
+            <AuthenticatedNotebookImage
               imageId={imageSrc}
-              dataStructureId={dataStructureId}
+              notebookId={notebookId}
               nodeId={nodeId}
               fetchAuthenticatedImage={fetchAuthenticatedImage}
             />
@@ -427,4 +426,4 @@ const DataStructureTipTapViewer = ({
   );
 };
 
-export default DataStructureTipTapViewer;
+export default NotebookTipTapViewer;

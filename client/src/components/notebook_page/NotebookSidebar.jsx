@@ -39,23 +39,22 @@ import {
   AddCircleOutline as AddCircleOutlineIcon,
 } from "@mui/icons-material";
 import { grey } from "@mui/material/colors";
-import { ActionDialog, WarningDialog } from "./DataStructureDialogs";
-import { DataStructureHooks } from "../../hooks/DataStructureHooks";
+import { ActionDialog, WarningDialog } from "./NotebookDialogs";
+import { NotebookHooks } from "../../hooks/NotebookHooks";
 import { NodeHooks } from "../../hooks/NodeHooks";
 
-const DataStructureSidebar = ({
-  dataStructures,
-  selectedStructure,
+const NotebookSidebar = ({
+  notebooks,
+  selectedNotebook,
   selectedNode,
-  onStructureSelect,
+  onNotebookSelect,
   onNodeSelect,
   addClicked,
 }) => {
-  const { addDataStructure, renameDataStructure, deleteDataStructure } =
-    DataStructureHooks();
+  const { addNotebook, renameNotebook, deleteNotebook } = NotebookHooks();
   const { addNode, updateNode, deleteNode } = NodeHooks();
 
-  const [expandedStructures, setExpandedStructures] = useState(new Set());
+  const [expandedNotebooks, setExpandedNotebooks] = useState(new Set());
   const [expandedNodes, setExpandedNodes] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearch, setShowSearch] = useState(false);
@@ -144,15 +143,14 @@ const DataStructureSidebar = ({
     return filterRecursive(tree);
   }, []);
 
-  // Expand the data structure (the root level)
-  const toggleStructure = (structureId) => {
-    const newExpanded = new Set(expandedStructures);
-    if (newExpanded.has(structureId)) {
-      newExpanded.delete(structureId);
+  const toggleNotebook = (notebookId) => {
+    const newExpanded = new Set(expandedNotebooks);
+    if (newExpanded.has(notebookId)) {
+      newExpanded.delete(notebookId);
     } else {
-      newExpanded.add(structureId);
+      newExpanded.add(notebookId);
     }
-    setExpandedStructures(newExpanded);
+    setExpandedNotebooks(newExpanded);
   };
 
   // Expand the child pages
@@ -173,10 +171,10 @@ const DataStructureSidebar = ({
     setParentNodeId(parentId);
     setDialogOpen(true);
 
-    if (type === "RenameStructure") {
-      const structure = dataStructures.find((ds) => ds.id === itemId);
-      setContextItem(structure);
-      setNewName(structure?.name || "");
+    if (type === "RenameNotebook") {
+      const notebook = notebooks.find((nb) => nb.id === itemId);
+      setContextItem(notebook);
+      setNewName(notebook?.name || "");
     } else if (type === "RenamePage") {
       const findNodeInTree = (tree, nodeId) => {
         for (const node of tree) {
@@ -188,7 +186,7 @@ const DataStructureSidebar = ({
         }
         return null;
       };
-      const node = findNodeInTree(selectedStructure?.contentTree || [], itemId);
+      const node = findNodeInTree(selectedNotebook?.contentTree || [], itemId);
       setContextItem(node);
       setNewName(node?.name || "");
     }
@@ -207,28 +205,28 @@ const DataStructureSidebar = ({
   const handleSubmit = async () => {
     try {
       switch (actionType) {
-        case "AddStructure":
-          await addDataStructure(newName);
+        case "AddNotebook":
+          await addNotebook(newName);
           break;
-        case "RenameStructure":
-          await renameDataStructure(selectedId, newName);
+        case "RenameNotebook":
+          await renameNotebook(selectedId, newName);
           break;
-        case "DeleteStructure":
-          await deleteDataStructure(selectedId);
-          if (selectedStructure?.id === selectedId) {
-            onStructureSelect(null);
+        case "DeleteNotebook":
+          await deleteNotebook(selectedId);
+          if (selectedNotebook?.id === selectedId) {
+            onNotebookSelect(null);
           }
           break;
         case "AddRootPage":
-          await addNode(selectedStructure.id, newName);
+          await addNode(selectedNotebook.id, newName);
           break;
         case "AddChildPage":
-          await addNode(selectedStructure.id, newName, parentNodeId);
+          await addNode(selectedNotebook.id, newName, parentNodeId);
           break;
         case "RenamePage":
           if (contextItem) {
             await updateNode(
-              selectedStructure.id,
+              selectedNotebook.id,
               selectedId,
               newName,
               contextItem.content
@@ -236,7 +234,7 @@ const DataStructureSidebar = ({
           }
           break;
         case "DeletePage":
-          await deleteNode(selectedStructure.id, selectedId);
+          await deleteNode(selectedNotebook.id, selectedId);
           if (selectedNode?.id === selectedId) {
             onNodeSelect(null);
           }
@@ -262,14 +260,14 @@ const DataStructureSidebar = ({
   const handleMenuItemClick = (action) => {
     setAnchorEl(null);
     if (action === "rename") {
-      if (actionType === "structure") {
-        handleDialogOpen("RenameStructure", selectedId);
+      if (actionType === "notebook") {
+        handleDialogOpen("RenameNotebook", selectedId);
       } else {
         handleDialogOpen("RenamePage", selectedId);
       }
     } else if (action === "delete") {
-      if (actionType === "structure") {
-        handleDialogOpen("DeleteStructure", selectedId);
+      if (actionType === "notebook") {
+        handleDialogOpen("DeleteNotebook", selectedId);
       } else {
         handleDialogOpen("DeletePage", selectedId);
       }
@@ -284,10 +282,10 @@ const DataStructureSidebar = ({
       return;
     }
 
-    if (type === "structure") {
-      onStructureSelect(item);
-      if (!expandedStructures.has(item.id)) {
-        toggleStructure(item.id);
+    if (type === "notebook") {
+      onNotebookSelect(item);
+      if (!expandedNotebooks.has(item.id)) {
+        toggleNotebook(item.id);
       }
     } else if (type === "node") {
       onNodeSelect(item);
@@ -448,7 +446,7 @@ const DataStructureSidebar = ({
               flex: 1,
             }}
           >
-            Data Structures
+            Notebooks
           </Typography>
 
           <Tooltip title="Search">
@@ -468,10 +466,10 @@ const DataStructureSidebar = ({
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="New Data Structure">
+          <Tooltip title="New Notebook">
             <IconButton
               size="small"
-              onClick={() => handleDialogOpen("AddStructure")}
+              onClick={() => handleDialogOpen("AddNotebook")}
               sx={{
                 color: grey[400],
                 "&:hover": { color: grey[300] },
@@ -523,14 +521,14 @@ const DataStructureSidebar = ({
       {/* Sidebar Content */}
       <Box sx={{ flex: 1, overflow: "auto", py: 1 }}>
         <List sx={{ px: 1 }}>
-          {dataStructures.map((structure) => {
-            const isExpanded = expandedStructures.has(structure.id);
-            const isSelected = selectedStructure?.id === structure.id;
+          {notebooks.map((notebook) => {
+            const isExpanded = expandedNotebooks.has(notebook.id);
+            const isSelected = selectedNotebook?.id === notebook.id;
             const hasNodes =
-              structure.contentTree && structure.contentTree.length > 0;
+              notebook.contentTree && notebook.contentTree.length > 0;
 
             return (
-              <Box key={structure.id} sx={{ mb: 1 }}>
+              <Box key={notebook.id} sx={{ mb: 1 }}>
                 <ListItem
                   disablePadding
                   sx={{
@@ -542,7 +540,7 @@ const DataStructureSidebar = ({
                   }}
                 >
                   <ListItemButton
-                    onClick={() => handleItemClick("structure", structure)}
+                    onClick={() => handleItemClick("notebook", notebook)}
                     sx={{
                       py: 1,
                       px: 1.5,
@@ -554,7 +552,7 @@ const DataStructureSidebar = ({
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleStructure(structure.id);
+                          toggleNotebook(notebook.id);
                         }}
                         sx={{ p: 0.25 }}
                       >
@@ -569,7 +567,7 @@ const DataStructureSidebar = ({
                     </ListItemIcon>
 
                     <ListItemText
-                      primary={structure.name}
+                      primary={notebook.name}
                       primaryTypographyProps={{
                         variant: "subtitle2",
                         sx: {
@@ -582,7 +580,7 @@ const DataStructureSidebar = ({
 
                     {hasNodes && (
                       <Chip
-                        label={structure.contentTree.length}
+                        label={notebook.contentTree.length}
                         size="small"
                         sx={{
                           height: 20,
@@ -597,7 +595,7 @@ const DataStructureSidebar = ({
                     <IconButton
                       size="small"
                       onClick={(e) =>
-                        handleMenuClick(e, "structure", structure.id)
+                        handleMenuClick(e, "notebook", notebook.id)
                       }
                       sx={{
                         p: 0.25,
@@ -611,7 +609,7 @@ const DataStructureSidebar = ({
                   </ListItemButton>
                 </ListItem>
 
-                {/* Structure Actions Row */}
+                {/* Notebook Actions Row */}
                 {isSelected && (
                   <Fade in={true} timeout={300}>
                     <Box sx={{ mt: 0.5, mb: 1, ml: 1.5 }}>
@@ -641,7 +639,7 @@ const DataStructureSidebar = ({
                 <Collapse in={isExpanded} timeout={200}>
                   {hasNodes && (
                     <List sx={{ py: 0 }}>
-                      {renderNodeTree(structure.contentTree)}
+                      {renderNodeTree(notebook.contentTree)}
                     </List>
                   )}
                 </Collapse>
@@ -651,7 +649,7 @@ const DataStructureSidebar = ({
         </List>
 
         {/* Empty State */}
-        {dataStructures.length === 0 && (
+        {notebooks.length === 0 && (
           <Box
             sx={{
               display: "flex",
@@ -677,13 +675,13 @@ const DataStructureSidebar = ({
                 mb: 2,
               }}
             >
-              No data structures yet
+              No notebooks yet
             </Typography>
             <Button
               variant="outlined"
               size="small"
               startIcon={<AddIcon />}
-              onClick={() => handleDialogOpen("AddStructure")}
+              onClick={() => handleDialogOpen("AddNotebook")}
               sx={{
                 color: grey[400],
                 borderColor: grey[700],
@@ -693,7 +691,7 @@ const DataStructureSidebar = ({
                 },
               }}
             >
-              Create First Structure
+              Create First Notebook
             </Button>
           </Box>
         )}
@@ -718,7 +716,7 @@ const DataStructureSidebar = ({
           },
         }}
       >
-        {actionType === "structure" && [
+        {actionType === "notebook" && [
           <MenuItem key="rename" onClick={() => handleMenuItemClick("rename")}>
             <EditIcon sx={{ mr: 1, fontSize: 16 }} />
             Rename
@@ -755,12 +753,12 @@ const DataStructureSidebar = ({
         onClose={handleDialogClose}
         onSubmit={handleSubmit}
         title={
-          actionType === "AddStructure"
-            ? "New Data Structure"
-            : actionType === "RenameStructure"
-            ? "Rename Data Structure"
-            : actionType === "DeleteStructure"
-            ? "Delete Data Structure"
+          actionType === "AddNotebook"
+            ? "New Notebook"
+            : actionType === "RenameNotebook"
+            ? "Rename Notebook"
+            : actionType === "DeleteNotebook"
+            ? "Delete Notebook"
             : actionType === "AddRootPage"
             ? "Add Root Page"
             : actionType === "AddChildPage"
@@ -808,4 +806,4 @@ const DataStructureSidebar = ({
   );
 };
 
-export default DataStructureSidebar;
+export default NotebookSidebar;

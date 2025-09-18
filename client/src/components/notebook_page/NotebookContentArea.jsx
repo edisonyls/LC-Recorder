@@ -26,16 +26,16 @@ import {
   AccountTree as AccountTreeIcon,
 } from "@mui/icons-material";
 import { grey } from "@mui/material/colors";
-import DataStructureTipTapViewer from "./DataStructureTipTapViewer";
+import NotebookTipTapViewer from "./NotebookTipTapViewer";
 import { NodeHooks } from "../../hooks/NodeHooks";
 import {
   parseTipTapContent,
   getDefaultTipTapContent,
 } from "../../utils/tipTapContentParser";
-import DataStructureTipTapSolution from "./DataStructureTipTapSolution";
+import NotebookTipTapSolution from "./NotebookTipTapSolution";
 
-const DataStructureContentArea = ({
-  selectedStructure,
+const NotebookContentArea = ({
+  selectedNotebook,
   selectedNode,
   addClicked,
   setAddClicked,
@@ -73,7 +73,7 @@ const DataStructureContentArea = ({
 
   // Generate breadcrumb path
   const generateBreadcrumbs = () => {
-    if (!selectedStructure || !selectedNode) return [];
+    if (!selectedNotebook || !selectedNode) return [];
 
     try {
       const findNodePath = (tree, targetId, path = []) => {
@@ -98,7 +98,7 @@ const DataStructureContentArea = ({
         return null;
       };
 
-      return findNodePath(selectedStructure.contentTree, selectedNode.id) || [];
+      return findNodePath(selectedNotebook.contentTree, selectedNode.id) || [];
     } catch (error) {
       console.error("Error generating breadcrumbs:", error);
       return [];
@@ -128,12 +128,12 @@ const DataStructureContentArea = ({
   };
 
   const handleEditSave = async () => {
-    if (!selectedStructure || !selectedNode) return;
+    if (!selectedNotebook || !selectedNode) return;
 
     setIsLoading(true);
     try {
       await updateNode(
-        selectedStructure.id,
+        selectedNotebook.id,
         selectedNode.id,
         selectedNode.name,
         JSON.stringify(editingContent)
@@ -157,13 +157,12 @@ const DataStructureContentArea = ({
         )
     );
 
-    if (imageInfo && selectedNode && selectedStructure) {
+    if (imageInfo && selectedNode && selectedNotebook) {
       console.log("Image uploaded:", imageInfo);
     }
   };
 
-  // Welcome state when no structure selected
-  if (!selectedStructure) {
+  if (!selectedNotebook) {
     return (
       <Box
         sx={{
@@ -192,7 +191,7 @@ const DataStructureContentArea = ({
             textAlign: "center",
           }}
         >
-          Welcome to Data Structures
+          Welcome to your personal notebook
         </Typography>
         <Typography
           variant="body1"
@@ -203,16 +202,16 @@ const DataStructureContentArea = ({
             lineHeight: 1.6,
           }}
         >
-          Select a data structure from the sidebar to start exploring and
-          editing your hierarchical content, or create a new one to get started.
+          Select a page from the sidebar to start exploring and editing your
+          hierarchical content, or create a new one to get started.
         </Typography>
       </Box>
     );
   }
 
-  // Structure selected but no node
+  // Root page selected but no node
   if (!selectedNode) {
-    const nodeCount = selectedStructure?.contentTree?.length || 0;
+    const nodeCount = selectedNotebook?.contentTree?.length || 0;
 
     return (
       <Box
@@ -242,7 +241,7 @@ const DataStructureContentArea = ({
                   mb: 0.5,
                 }}
               >
-                {selectedStructure.name}
+                {selectedNotebook.name}
               </Typography>
               <Stack direction="row" alignItems="center" spacing={2}>
                 <Chip
@@ -261,7 +260,7 @@ const DataStructureContentArea = ({
                   }}
                 >
                   Created{" "}
-                  {new Date(selectedStructure.createdAt).toLocaleDateString()}
+                  {new Date(selectedNotebook.createdAt).toLocaleDateString()}
                 </Typography>
               </Stack>
             </Box>
@@ -295,7 +294,7 @@ const DataStructureContentArea = ({
               textAlign: "center",
             }}
           >
-            {nodeCount === 0 ? "Empty Structure" : "Select a Node"}
+            {nodeCount === 0 ? "Empty Notebook" : "Select a Page to View"}
           </Typography>
           <Typography
             variant="body1"
@@ -308,8 +307,8 @@ const DataStructureContentArea = ({
             }}
           >
             {nodeCount === 0
-              ? "This data structure doesn't have any nodes yet. Start by adding a root node from the sidebar."
-              : "Choose a node from the tree structure in the sidebar to view and edit its content."}
+              ? "This notebook doesn't have any pages yet. Start by adding a root page from the sidebar."
+              : "Choose a page from the tree structure in the sidebar to view and edit its content."}
           </Typography>
 
           {nodeCount === 0 && (
@@ -370,7 +369,7 @@ const DataStructureContentArea = ({
             }}
           >
             <HomeIcon sx={{ mr: 0.5, fontSize: 16 }} />
-            {selectedStructure.name}
+            {selectedNotebook.name}
           </Link>
           {breadcrumbs.map((node, index) => {
             const isLast = index === breadcrumbs.length - 1;
@@ -530,12 +529,12 @@ const DataStructureContentArea = ({
             }}
           >
             {isEditing ? (
-              <DataStructureTipTapSolution
+              <NotebookTipTapSolution
                 content={editingContent}
                 onContentChange={handleContentChange}
                 showDeleteButton={false}
                 showHeader={false}
-                structureId={selectedStructure.id}
+                notebookId={selectedNotebook.id}
                 nodeId={selectedNode.id}
                 sx={{
                   mb: 0,
@@ -543,10 +542,10 @@ const DataStructureContentArea = ({
                 }}
               />
             ) : (
-              <DataStructureTipTapViewer
+              <NotebookTipTapViewer
                 content={selectedNode.content}
                 title=""
-                dataStructureId={selectedStructure.id}
+                notebookId={selectedNotebook.id}
                 nodeId={selectedNode.id}
                 sx={{
                   mb: 0,
@@ -561,4 +560,4 @@ const DataStructureContentArea = ({
   );
 };
 
-export default DataStructureContentArea;
+export default NotebookContentArea;

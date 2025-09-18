@@ -16,7 +16,7 @@ import { Color } from "@tiptap/extension-color";
 import ListItem from "@tiptap/extension-list-item";
 import TextStyle from "@tiptap/extension-text-style";
 import { Image } from "@tiptap/extension-image";
-import DataStructureTipTapMenuBar from "./DataStructureTipTapMenuBar";
+import NotebookTipTapMenuBar from "./NotebookTipTapMenuBar";
 import {
   parseTipTapContent,
   getDefaultTipTapContent,
@@ -29,14 +29,14 @@ const extensions = [
   Image,
 ];
 
-const DataStructureTipTapSolution = ({
+const NotebookTipTapSolution = ({
   deleteSolution,
   showDeleteButton = true,
   content,
   onContentChange,
   title,
   showHeader = true,
-  structureId,
+  notebookId,
   nodeId,
   sx = {},
 }) => {
@@ -265,8 +265,8 @@ const DataStructureTipTapSolution = ({
             onContentChange(currentContent);
           }}
           slotBefore={
-            <DataStructureTipTapMenuBar
-              structureId={structureId}
+            <NotebookTipTapMenuBar
+              notebookId={notebookId}
               nodeId={nodeId}
               onContentChange={(content, imageInfo) => {
                 if (imageInfo) {
@@ -283,4 +283,4 @@ const DataStructureTipTapSolution = ({
   );
 };
 
-export default DataStructureTipTapSolution;
+export default NotebookTipTapSolution;

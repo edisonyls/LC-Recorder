@@ -49,10 +49,10 @@ const OptionDrawer = ({
       roles: ["REGULAR", "PREMIUM", "PREPLUS", "ADMIN"],
     },
     {
-      text: "Data Structure",
+      text: "Notebook",
       icon: <StorageIcon />,
-      path: "/data-structure",
-      onClick: () => navigate("/data-structure"),
+      path: "/notebook",
+      onClick: () => navigate("/notebook"),
       roles: ["PREPLUS", "ADMIN"],
     },
     {

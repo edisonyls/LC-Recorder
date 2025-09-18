@@ -15,35 +15,30 @@ import {
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { grey } from "@mui/material/colors";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { ActionDialog, WarningDialog } from "./DataStructureDialogs";
-import { DataStructureHooks } from "../../hooks/DataStructureHooks";
+import { ActionDialog, WarningDialog } from "./NotebookDialogs";
+import { NotebookHooks } from "../../hooks/NotebookHooks";
 
-const DataStructureList = ({
-  dataStructure,
-  handleStructureClick,
-  addClicked,
-}) => {
-  const { addDataStructure, renameDataStructure, deleteDataStructure } =
-    DataStructureHooks();
+const NotebookList = ({ notebook, handleNotebookClick, addClicked }) => {
+  const { addNotebook, renameNotebook, deleteNotebook } = NotebookHooks();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [warningDialogOpen, setWaringDialogOpen] = useState(false);
-  const [actionType, setActionType] = useState(""); // Add, rename and delete
-  const [anchorEl, setAnchorEl] = useState(null); // For the menu
-  const [selectedId, setSelectedId] = useState(null); // storing the selected structure id
-  const [newName, setNewName] = useState(""); // name of the renamed data structure
-  const [selectedStructure, setSelectedStructure] = useState(null); // selected data structure by the user
+  const [actionType, setActionType] = useState("");
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
+  const [newName, setNewName] = useState("");
+  const [selectedNotebook, setSelectedNotebook] = useState(null);
 
-  const open = Boolean(anchorEl); // To check if menu is open
+  const open = Boolean(anchorEl);
 
   const handleDialogOpen = (type) => {
     setActionType(type);
     setDialogOpen(true);
     if (type === "Rename") {
-      const selectedStructure = dataStructure.find(
-        (structure) => structure.id === selectedId
+      const selectedNotebook = notebook.find(
+        (notebook) => notebook.id === selectedId
       );
-      setSelectedStructure(selectedStructure);
-      setNewName(selectedStructure ? selectedStructure.name : "");
+      setSelectedNotebook(selectedNotebook);
+      setNewName(selectedNotebook ? selectedNotebook.name : "");
     }
   };
 
@@ -55,17 +50,17 @@ const DataStructureList = ({
   const handleSubmit = () => {
     switch (actionType) {
       case "Add":
-        addDataStructure(newName);
+        addNotebook(newName);
         setDialogOpen(false);
         break;
       case "Rename":
-        renameDataStructure(selectedId, newName);
+        renameNotebook(selectedId, newName);
         setDialogOpen(false);
         break;
       case "Delete":
-        deleteDataStructure(selectedId);
-        handleStructureClick(null);
-        setSelectedStructure(null);
+        deleteNotebook(selectedId);
+        handleNotebookClick(null);
+        setSelectedNotebook(null);
         setSelectedId(null);
         setDialogOpen(false);
         break;
@@ -80,21 +75,21 @@ const DataStructureList = ({
     handleDialogOpen(type);
   };
 
-  const handleListItemClick = (structure) => {
+  const handleListItemClick = (notebook) => {
     if (addClicked) {
       setWaringDialogOpen(true);
       return;
     }
-    handleStructureClick(structure);
-    setSelectedStructure(structure);
-    setSelectedId(structure.id);
+    handleNotebookClick(notebook);
+    setSelectedNotebook(notebook);
+    setSelectedId(notebook.id);
   };
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
       <List>
         <ListItem>
-          <Typography>Data Structures</Typography>
+          <Typography>Notebooks</Typography>
           <IconButton
             aria-label="more"
             aria-controls="long-menu"
@@ -126,23 +121,19 @@ const DataStructureList = ({
               sx={{ color: grey[900] }}
               disabled={!selectedId}
             >
-              {selectedStructure
-                ? `Rename ${selectedStructure.name}`
-                : "Rename"}
+              {selectedNotebook ? `Rename ${selectedNotebook.name}` : "Rename"}
             </MenuItem>
             <MenuItem
               onClick={() => handleMenuItemClick("Delete")}
               sx={{ color: grey[900] }}
               disabled={!selectedId}
             >
-              {selectedStructure
-                ? `Delete ${selectedStructure.name}`
-                : "Delete"}
+              {selectedNotebook ? `Delete ${selectedNotebook.name}` : "Delete"}
             </MenuItem>
           </Menu>
         </ListItem>
         <Divider sx={{ background: grey[50] }} />
-        {dataStructure.length === 0 ? (
+        {notebook.length === 0 ? (
           <Box
             sx={{
               display: "flex",
@@ -163,7 +154,7 @@ const DataStructureList = ({
                   },
                 },
               }}
-              title="Please click on the dot icon above to create a new data structure"
+              title="Please click on the dot icon above to create a new Notebook"
             >
               <IconButton>
                 <HelpOutlineIcon sx={{ color: "#fff", fontSize: "1rem" }} />
@@ -177,21 +168,21 @@ const DataStructureList = ({
               minHeight: 300,
             }}
           >
-            {dataStructure.map((structure) => (
+            {notebook.map((book) => (
               <ListItem
-                key={structure.id}
+                key={book.id}
                 disablePadding
                 sx={{
                   backgroundColor:
-                    selectedId === structure.id ? grey[700] : "transparent",
+                    selectedId === book.id ? grey[700] : "transparent",
                   "&:hover": {
                     backgroundColor: grey[700],
                   },
                 }}
               >
-                <ListItemButton onClick={() => handleListItemClick(structure)}>
+                <ListItemButton onClick={() => handleListItemClick(book)}>
                   <ListItemText
-                    primary={structure.name}
+                    primary={book.name}
                     primaryTypographyProps={{ sx: { color: grey[50] } }}
                   />
                 </ListItemButton>
@@ -204,7 +195,7 @@ const DataStructureList = ({
         open={dialogOpen}
         onClose={handleDialogClose}
         actionType={actionType}
-        structureName="Data Structure"
+        notebookName="Notebook"
         newName={newName}
         setNewName={setNewName}
         onSubmit={handleSubmit}
@@ -222,4 +213,4 @@ const DataStructureList = ({
   );
 };
 
-export default DataStructureList;
+export default NotebookList;

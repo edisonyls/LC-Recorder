@@ -9,7 +9,7 @@ import {
   PrimaryButton,
   SecondaryButton,
 } from "../components/generic/GenericButton";
-import DataStructureImage from "../images/DataStructureImage.png";
+import NotebookImage from "../images/NotebookImage.png";
 import DashboardImage from "../images/dashboard.png";
 import CodeDetailsImage from "../images/codeDetails.png";
 import SpeedIcon from "@mui/icons-material/Speed";
@@ -429,7 +429,7 @@ const features = [
   },
   {
     icon: <GroupIcon sx={{ fontSize: 32 }} />,
-    title: "Data Structures & Algorithms",
+    title: "Notebooks",
     description:
       "Take comprehensive notes on data structures and algorithms you've studied, with organized sections for concepts, implementations, and examples for easy reference.",
     gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
@@ -464,10 +464,10 @@ const featureShowcases = [
     ],
   },
   {
-    title: "Data Structures & Algorithms",
+    title: "Personal Notebooks",
     description:
-      "Build your personal knowledge base by taking detailed notes on data structures and algorithms you've learned, with easy access whenever you need to review.",
-    image: DataStructureImage,
+      "Build your personal knowledge base by taking detailed notes on any topic you're learning, with easy access whenever you need to review.",
+    image: NotebookImage,
     gradient: "#4facfe 0%, #00f2fe 100%",
     benefits: [
       "Create organized notes for each concept",
@@ -530,11 +530,6 @@ const FloatingElement = styled(Box)(({ theme }) => ({
 const FeaturesSection = styled(Box)(({ theme }) => ({
   padding: theme.spacing(10, 0),
   background: theme.palette.background.paper,
-}));
-
-const ServicesSection = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(10, 0),
-  background: theme.palette.background.default,
 }));
 
 const SectionHeader = styled(Box)(({ theme }) => ({

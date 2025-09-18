@@ -1,24 +1,24 @@
 import { axiosInstance } from "../config/axiosConfig";
-import { useDataStructure } from "../context/dataStructureContext";
-import { actionTypes } from "../reducer/dataStructureActions";
+import { useNotebook } from "../context/notebookContext";
+import { actionTypes } from "../reducer/notebookActions";
 
 export const NodeHooks = () => {
-  const { dispatch } = useDataStructure();
+  const { dispatch } = useNotebook();
 
-  const addNode = async (dataStructureId, name, parentNodeId = null) => {
+  const addNode = async (notebookId, name, parentNodeId = null) => {
     dispatch({ type: actionTypes.PROCESS_START });
     try {
-      const url = parentNodeId 
-        ? `data-structure/${dataStructureId}/node?parentNodeId=${parentNodeId}`
-        : `data-structure/${dataStructureId}/node`;
-      
+      const url = parentNodeId
+        ? `notebook/${notebookId}/node?parentNodeId=${parentNodeId}`
+        : `notebook/${notebookId}/node`;
+
       const response = await axiosInstance.post(url, {
         name,
         content: "",
       });
-      
+
       dispatch({
-        type: actionTypes.UPDATE_DATA_STRUCTURE_SUCCESS,
+        type: actionTypes.UPDATE_NOTEBOOK_SUCCESS,
         payload: response.data.data,
       });
     } catch (error) {
@@ -30,15 +30,18 @@ export const NodeHooks = () => {
     }
   };
 
-  const updateNode = async (dataStructureId, nodeId, name, content) => {
+  const updateNode = async (notebookId, nodeId, name, content) => {
     dispatch({ type: actionTypes.PROCESS_START });
     try {
-      const response = await axiosInstance.put(`data-structure/${dataStructureId}/node/${nodeId}`, {
-        name,
-        content,
-      });
+      const response = await axiosInstance.put(
+        `notebook/${notebookId}/node/${nodeId}`,
+        {
+          name,
+          content,
+        }
+      );
       dispatch({
-        type: actionTypes.UPDATE_DATA_STRUCTURE_SUCCESS,
+        type: actionTypes.UPDATE_NOTEBOOK_SUCCESS,
         payload: response.data.data,
       });
     } catch (error) {
@@ -50,12 +53,14 @@ export const NodeHooks = () => {
     }
   };
 
-  const deleteNode = async (dataStructureId, nodeId) => {
+  const deleteNode = async (notebookId, nodeId) => {
     dispatch({ type: actionTypes.PROCESS_START });
     try {
-      const response = await axiosInstance.delete(`data-structure/${dataStructureId}/node/${nodeId}`);
+      const response = await axiosInstance.delete(
+        `notebook/${notebookId}/node/${nodeId}`
+      );
       dispatch({
-        type: actionTypes.UPDATE_DATA_STRUCTURE_SUCCESS,
+        type: actionTypes.UPDATE_NOTEBOOK_SUCCESS,
         payload: response.data.data,
       });
     } catch (error) {
@@ -67,9 +72,11 @@ export const NodeHooks = () => {
     }
   };
 
-  const getNode = async (dataStructureId, nodeId) => {
+  const getNode = async (notebookId, nodeId) => {
     try {
-      const response = await axiosInstance.get(`data-structure/${dataStructureId}/node/${nodeId}`);
+      const response = await axiosInstance.get(
+        `notebook/${notebookId}/node/${nodeId}`
+      );
       return response.data.data;
     } catch (error) {
       console.error("Failed to get the node: ", error);
@@ -77,13 +84,13 @@ export const NodeHooks = () => {
     }
   };
 
-  const uploadNodeImage = async (dataStructureId, nodeId, imageFile) => {
+  const uploadNodeImage = async (notebookId, nodeId, imageFile) => {
     try {
       const formData = new FormData();
       formData.append("image", imageFile);
-      
+
       const response = await axiosInstance.post(
-        `data-structure/${dataStructureId}/node/${nodeId}/upload-image`,
+        `notebook/${notebookId}/node/${nodeId}/upload-image`,
         formData,
         {
           headers: {
@@ -98,10 +105,10 @@ export const NodeHooks = () => {
     }
   };
 
-  const deleteNodeImage = async (dataStructureId, nodeId, imageId) => {
+  const deleteNodeImage = async (notebookId, nodeId, imageId) => {
     try {
       const response = await axiosInstance.delete(
-        `data-structure/${dataStructureId}/node/${nodeId}/image/${imageId}`
+        `notebook/${notebookId}/node/${nodeId}/image/${imageId}`
       );
       return response.data.data;
     } catch (error) {
@@ -110,5 +117,12 @@ export const NodeHooks = () => {
     }
   };
 
-  return { addNode, updateNode, deleteNode, getNode, uploadNodeImage, deleteNodeImage };
+  return {
+    addNode,
+    updateNode,
+    deleteNode,
+    getNode,
+    uploadNodeImage,
+    deleteNodeImage,
+  };
 };

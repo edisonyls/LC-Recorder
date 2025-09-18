@@ -8,9 +8,9 @@ import NewQuestion from "./pages/NewQuestion";
 import QuestionDetails from "./pages/QuestionDetails";
 import ProfilePage from "./pages/ProfilePage";
 import FriendPage from "./pages/FriendPage";
-import DataStructurePage from "./pages/DataStructurePage";
+import NotebookPage from "./pages/NotebookPage";
 import { UserProvider } from "./context/userContext";
-import { DataStructureProvider } from "./context/dataStructureContext";
+import { NotebookProvider } from "./context/notebookContext";
 import TablePage from "./pages/TablePage";
 import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
@@ -23,7 +23,7 @@ function App() {
   return (
     <>
       <UserProvider>
-        <DataStructureProvider>
+        <NotebookProvider>
           <Router>
             <Routes>
               <Route path="/" Component={Home} exact />
@@ -38,11 +38,7 @@ function App() {
                 <Route path="/dashboard" Component={Dashboard} exact />
                 <Route Component={PremiumRoute} exact>
                   <Route Component={PremiumPlusRoute} exact>
-                    <Route
-                      path="/data-structure"
-                      Component={DataStructurePage}
-                      exact
-                    />
+                    <Route path="/notebook" Component={NotebookPage} exact />
                   </Route>
                   <Route path="/friends" Component={FriendPage} exact />
                 </Route>
@@ -58,7 +54,7 @@ function App() {
             limit={5}
             theme="light"
           />
-        </DataStructureProvider>
+        </NotebookProvider>
       </UserProvider>
     </>
   );

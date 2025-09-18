@@ -1,4 +1,4 @@
-package com.yls.ylslc.data_structure;
+package com.yls.ylslc.notebook;
 
 import org.springframework.stereotype.Service;
 
@@ -7,22 +7,22 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class DataStructureTreeService {
+public class NotebookTreeService {
 
     // Adds a root node to the content tree
-    public void addRootNode(DataStructureEntity dataStructure, DataStructureNode node) {
+    public void addRootNode(NotebookEntity notebook, NotebookNode node) {
         prepareNode(node);
-        dataStructure.getContentTree().add(node);
+        notebook.getContentTree().add(node);
     }
 
     // Finds a node by ID in the tree structure
-    public DataStructureNode findNodeById(DataStructureEntity dataStructure, String nodeId) {
-        return findNodeRecursive(dataStructure.getContentTree(), nodeId);
+    public NotebookNode findNodeById(NotebookEntity notebook, String nodeId) {
+        return findNodeRecursive(notebook.getContentTree(), nodeId);
     }
 
     // Adds a child node to a parent node
-    public boolean addChildNode(DataStructureEntity dataStructure, String parentNodeId, DataStructureNode childNode) {
-        DataStructureNode parent = findNodeById(dataStructure, parentNodeId);
+    public boolean addChildNode(NotebookEntity notebook, String parentNodeId, NotebookNode childNode) {
+        NotebookNode parent = findNodeById(notebook, parentNodeId);
         if (parent == null) {
             return false;
         }
@@ -36,13 +36,13 @@ public class DataStructureTreeService {
     }
 
     // Removes a node by ID from the tree structure
-    public boolean removeNodeById(DataStructureEntity dataStructure, String nodeId) {
-        return removeNodeRecursive(dataStructure.getContentTree(), nodeId);
+    public boolean removeNodeById(NotebookEntity notebook, String nodeId) {
+        return removeNodeRecursive(notebook.getContentTree(), nodeId);
     }
 
     // Updates a node's name and/or content
-    public boolean updateNode(DataStructureEntity dataStructure, String nodeId, String name, String content) {
-        DataStructureNode node = findNodeById(dataStructure, nodeId);
+    public boolean updateNode(NotebookEntity notebook, String nodeId, String name, String content) {
+        NotebookNode node = findNodeById(notebook, nodeId);
         if (node == null) {
             return false;
         }
@@ -57,17 +57,17 @@ public class DataStructureTreeService {
     }
 
     // Counts total nodes in the tree
-    public int countNodes(DataStructureEntity dataStructure) {
-        return countNodesRecursive(dataStructure.getContentTree());
+    public int countNodes(NotebookEntity notebook) {
+        return countNodesRecursive(notebook.getContentTree());
     }
 
     // Gets the level/depth of a specific node
-    public int getNodeLevel(DataStructureEntity dataStructure, String nodeId) {
-        return getNodeLevelRecursive(dataStructure.getContentTree(), nodeId, 0);
+    public int getNodeLevel(NotebookEntity notebook, String nodeId) {
+        return getNodeLevelRecursive(notebook.getContentTree(), nodeId, 0);
     }
 
     // Private helper methods
-    private void prepareNode(DataStructureNode node) {
+    private void prepareNode(NotebookNode node) {
         if (node.getId() == null) {
             node.setId(UUID.randomUUID().toString());
         }
@@ -82,13 +82,13 @@ public class DataStructureTreeService {
         }
     }
 
-    private DataStructureNode findNodeRecursive(List<DataStructureNode> nodes, String nodeId) {
-        for (DataStructureNode node : nodes) {
+    private NotebookNode findNodeRecursive(List<NotebookNode> nodes, String nodeId) {
+        for (NotebookNode node : nodes) {
             if (node.getId().equals(nodeId)) {
                 return node;
             }
             if (node.getChildren() != null) {
-                DataStructureNode found = findNodeRecursive(node.getChildren(), nodeId);
+                NotebookNode found = findNodeRecursive(node.getChildren(), nodeId);
                 if (found != null) {
                     return found;
                 }
@@ -97,9 +97,9 @@ public class DataStructureTreeService {
         return null;
     }
 
-    private boolean removeNodeRecursive(List<DataStructureNode> nodes, String nodeId) {
+    private boolean removeNodeRecursive(List<NotebookNode> nodes, String nodeId) {
         for (int i = 0; i < nodes.size(); i++) {
-            DataStructureNode node = nodes.get(i);
+            NotebookNode node = nodes.get(i);
             if (node.getId().equals(nodeId)) {
                 nodes.remove(i);
                 return true;
@@ -111,9 +111,9 @@ public class DataStructureTreeService {
         return false;
     }
 
-    private int countNodesRecursive(List<DataStructureNode> nodes) {
+    private int countNodesRecursive(List<NotebookNode> nodes) {
         int count = 0;
-        for (DataStructureNode node : nodes) {
+        for (NotebookNode node : nodes) {
             count++; // Count current node
             if (node.getChildren() != null) {
                 count += countNodesRecursive(node.getChildren());
@@ -122,8 +122,8 @@ public class DataStructureTreeService {
         return count;
     }
 
-    private int getNodeLevelRecursive(List<DataStructureNode> nodes, String nodeId, int currentLevel) {
-        for (DataStructureNode node : nodes) {
+    private int getNodeLevelRecursive(List<NotebookNode> nodes, String nodeId, int currentLevel) {
+        for (NotebookNode node : nodes) {
             if (node.getId().equals(nodeId)) {
                 return currentLevel;
             }

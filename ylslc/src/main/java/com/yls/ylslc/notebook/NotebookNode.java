@@ -1,4 +1,4 @@
-package com.yls.ylslc.data_structure;
+package com.yls.ylslc.notebook;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DataStructureNode {
+public class NotebookNode {
     private String id;
     private String name;
     private String content;
@@ -22,9 +22,9 @@ public class DataStructureNode {
     private Integer orderIndex = 0;
     private LocalDateTime createdAt;
     @Builder.Default
-    private List<DataStructureNode> children = new ArrayList<>();
+    private List<NotebookNode> children = new ArrayList<>();
 
-    public DataStructureNode(String name, String content) {
+    public NotebookNode(String name, String content) {
         this.id = UUID.randomUUID().toString();
         this.name = name;
         this.content = content;

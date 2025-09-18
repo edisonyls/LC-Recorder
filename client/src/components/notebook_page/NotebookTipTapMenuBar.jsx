@@ -24,11 +24,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import DataArrayIcon from "@mui/icons-material/DataArray";
 import { NodeHooks } from "../../hooks/NodeHooks";
 
-const DataStructureTipTapMenuBar = ({
-  onContentChange,
-  structureId,
-  nodeId,
-}) => {
+const NotebookTipTapMenuBar = ({ onContentChange, notebookId, nodeId }) => {
   const { editor } = useCurrentEditor();
   const [anchorEl, setAnchorEl] = useState(null);
   const [colorAnchorEl, setColorAnchorEl] = useState(null);
@@ -91,8 +87,8 @@ const DataStructureTipTapMenuBar = ({
 
     if (file) {
       try {
-        const imageId = await uploadNodeImage(structureId, nodeId, file);
-        const imageUrl = `/api/data-structure/${structureId}/node/${nodeId}/image/${imageId}`;
+        const imageId = await uploadNodeImage(notebookId, nodeId, file);
+        const imageUrl = `/api/notebook/${notebookId}/node/${nodeId}/image/${imageId}`;
         const result = {
           imageId,
           imageUrl,
@@ -468,4 +464,4 @@ const customColors = [
   "#FF5722",
 ];
 
-export default DataStructureTipTapMenuBar;
+export default NotebookTipTapMenuBar;

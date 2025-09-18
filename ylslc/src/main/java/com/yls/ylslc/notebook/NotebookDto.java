@@ -1,4 +1,4 @@
-package com.yls.ylslc.data_structure;
+package com.yls.ylslc.notebook;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,9 +13,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DataStructureDto {
+public class NotebookDto {
     private UUID id;
     private String name;
-    private List<DataStructureNode> contentTree;
+    private List<NotebookNode> contentTree;
     private LocalDateTime createdAt;
 }

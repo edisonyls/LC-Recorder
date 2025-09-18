@@ -1,20 +1,20 @@
 import { useState, useEffect } from "react";
 import { Box, CircularProgress, Backdrop } from "@mui/material";
 import AuthenticatedNavbar from "../components/navbar/AuthenticatedNavbar";
-import DataStructureSidebar from "../components/data_structure_page/DataStructureSidebar";
-import DataStructureContentArea from "../components/data_structure_page/DataStructureContentArea";
-import { DataStructureHooks } from "../hooks/DataStructureHooks";
-import { useDataStructure } from "../context/dataStructureContext";
+import NotebookSidebar from "../components/notebook_page/NotebookSidebar";
+import NotebookContentArea from "../components/notebook_page/NotebookContentArea";
+import { NotebookHooks } from "../hooks/NotebookHooks";
+import { useNotebook } from "../context/notebookContext";
 import Footer from "../components/Footer";
 import { UserHooks } from "../hooks/userHooks/UserHooks";
 
-const DataStructurePage = () => {
-  const { state } = useDataStructure();
-  const { dataStructures, loading } = state;
-  const [selectedStructure, setSelectedStructure] = useState(null);
+const NotebookPage = () => {
+  const { state } = useNotebook();
+  const { notebooks, loading } = state;
+  const [selectedNotebook, setSelectedNotebook] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
   const [addClicked, setAddClicked] = useState(false);
-  const { fetchDataStructures } = DataStructureHooks();
+  const { fetchNotebooks } = NotebookHooks();
   const { getCurrentUser } = UserHooks();
 
   useEffect(() => {
@@ -22,27 +22,27 @@ const DataStructurePage = () => {
   }, []); // eslint-disable-line
 
   useEffect(() => {
-    fetchDataStructures();
+    fetchNotebooks();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (selectedStructure) {
-      const updatedStructure = dataStructures.find(
-        (ds) => ds.id === selectedStructure.id
+    if (selectedNotebook) {
+      const updatedNotebook = notebooks.find(
+        (nb) => nb.id === selectedNotebook.id
       );
-      // Update selectedStructure if it has been found in global state and is different
+      // Update selectedNotebook if it has been found in global state and is different
       if (
-        updatedStructure &&
-        JSON.stringify(updatedStructure) !== JSON.stringify(selectedStructure)
+        updatedNotebook &&
+        JSON.stringify(updatedNotebook) !== JSON.stringify(selectedNotebook)
       ) {
-        setSelectedStructure(updatedStructure);
+        setSelectedNotebook(updatedNotebook);
       }
     }
-  }, [dataStructures, selectedStructure]);
+  }, [notebooks, selectedNotebook]);
 
-  // Update selected node when data structures change
+  // Update selected node when notebooks change
   useEffect(() => {
-    if (selectedStructure && selectedNode && selectedStructure.contentTree) {
+    if (selectedNotebook && selectedNode && selectedNotebook.contentTree) {
       const findNodeInTree = (tree, nodeId) => {
         for (const node of tree) {
           if (node.id === nodeId) {
@@ -57,7 +57,7 @@ const DataStructurePage = () => {
       };
 
       const updatedSelectedNode = findNodeInTree(
-        selectedStructure.contentTree,
+        selectedNotebook.contentTree,
         selectedNode.id
       );
       if (
@@ -67,10 +67,10 @@ const DataStructurePage = () => {
         setSelectedNode(updatedSelectedNode);
       }
     }
-  }, [dataStructures, selectedNode, selectedStructure]);
+  }, [notebooks, selectedNode, selectedNotebook]);
 
-  const handleStructureSelect = (structure) => {
-    setSelectedStructure(structure);
+  const handleNotebookSelect = (notebook) => {
+    setSelectedNotebook(notebook);
     setSelectedNode(null);
     setAddClicked(false);
   };
@@ -110,18 +110,18 @@ const DataStructurePage = () => {
           overflow: "hidden",
         }}
       >
-        <DataStructureSidebar
-          dataStructures={dataStructures}
-          selectedStructure={selectedStructure}
+        <NotebookSidebar
+          notebooks={notebooks}
+          selectedNotebook={selectedNotebook}
           selectedNode={selectedNode}
-          onStructureSelect={handleStructureSelect}
+          onNotebookSelect={handleNotebookSelect}
           onNodeSelect={handleNodeSelect}
           addClicked={addClicked}
         />
 
         {/* Main Content Area */}
-        <DataStructureContentArea
-          selectedStructure={selectedStructure}
+        <NotebookContentArea
+          selectedNotebook={selectedNotebook}
           selectedNode={selectedNode}
           addClicked={addClicked}
           setAddClicked={setAddClicked}
@@ -133,4 +133,4 @@ const DataStructurePage = () => {
   );
 };
 
-export default DataStructurePage;
+export default NotebookPage;
