@@ -22,8 +22,6 @@ import {
   ChevronRight as ChevronRightIcon,
   Description as DescriptionIcon,
   Folder as FolderIcon,
-  DataObject as DataObjectIcon,
-  AccountTree as AccountTreeIcon,
 } from "@mui/icons-material";
 import { grey } from "@mui/material/colors";
 import NotebookTipTapViewer from "./NotebookTipTapViewer";

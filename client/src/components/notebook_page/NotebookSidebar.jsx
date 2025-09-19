@@ -32,7 +32,6 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Search as SearchIcon,
-  AccountTree as AccountTreeIcon,
   FiberManualRecord as DotIcon,
   Close as CloseIcon,
   DataObject as DataObjectIcon,
