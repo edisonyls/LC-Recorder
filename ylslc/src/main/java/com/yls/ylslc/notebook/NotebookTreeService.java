@@ -9,18 +9,15 @@ import java.util.UUID;
 @Service
 public class NotebookTreeService {
 
-    // Adds a root node to the content tree
     public void addRootNode(NotebookEntity notebook, NotebookNode node) {
         prepareNode(node);
         notebook.getContentTree().add(node);
     }
 
-    // Finds a node by ID in the tree structure
     public NotebookNode findNodeById(NotebookEntity notebook, String nodeId) {
         return findNodeRecursive(notebook.getContentTree(), nodeId);
     }
 
-    // Adds a child node to a parent node
     public boolean addChildNode(NotebookEntity notebook, String parentNodeId, NotebookNode childNode) {
         NotebookNode parent = findNodeById(notebook, parentNodeId);
         if (parent == null) {
@@ -35,12 +32,10 @@ public class NotebookTreeService {
         return true;
     }
 
-    // Removes a node by ID from the tree structure
     public boolean removeNodeById(NotebookEntity notebook, String nodeId) {
         return removeNodeRecursive(notebook.getContentTree(), nodeId);
     }
 
-    // Updates a node's name and/or content
     public boolean updateNode(NotebookEntity notebook, String nodeId, String name, String content) {
         NotebookNode node = findNodeById(notebook, nodeId);
         if (node == null) {
@@ -56,17 +51,14 @@ public class NotebookTreeService {
         return true;
     }
 
-    // Counts total nodes in the tree
     public int countNodes(NotebookEntity notebook) {
         return countNodesRecursive(notebook.getContentTree());
     }
 
-    // Gets the level/depth of a specific node
     public int getNodeLevel(NotebookEntity notebook, String nodeId) {
         return getNodeLevelRecursive(notebook.getContentTree(), nodeId, 0);
     }
 
-    // Private helper methods
     private void prepareNode(NotebookNode node) {
         if (node.getId() == null) {
             node.setId(UUID.randomUUID().toString());

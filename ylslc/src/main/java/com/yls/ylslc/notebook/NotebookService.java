@@ -1,5 +1,7 @@
 package com.yls.ylslc.notebook;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -23,4 +25,10 @@ public interface NotebookService {
     NotebookDto deleteNode(UUID notebookId, String nodeId);
 
     NotebookNode findNode(UUID notebookId, String nodeId);
+
+    String uploadImages(MultipartFile image, String notebookId, String nodeId);
+
+    byte[] getImage(String notebookId, String nodeId, String imageId);
+
+    void deleteImage(String notebookId, String nodeId, String imageId);
 }

@@ -3,8 +3,15 @@ package com.yls.ylslc.notebook;
 import com.yls.ylslc.mappers.Mapper;
 import com.yls.ylslc.user.UserEntity;
 import com.yls.ylslc.user.UserService;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -53,8 +60,32 @@ public class NotebookServiceImpl implements NotebookService {
 
     @Override
     public NotebookDto delete(UUID id) {
+        // Delete associated image files if they exist
+        String username = userService.getCurrentUser().getUsername();
+        String sanitizedUsername = username.replaceAll("[^a-zA-Z0-9_-]", "_");
+        
         NotebookEntity notebookEntity = notebookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notebook not found"));
+        
+        // Delete the entire notebook image directory (which contains all node subdirectories)
+        Path imageFolderPath = Paths.get(
+                System.getProperty("user.home"),
+                "ylslc_images",
+                "notebook_images",
+                sanitizedUsername,
+                id.toString());
+        
+        try {
+            if (Files.exists(imageFolderPath)) {
+                Files.walk(imageFolderPath)
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete local image files for notebook: " + id, e);
+        }
+        
         NotebookDto deletedDto = notebookMapper.mapTo(notebookEntity);
         notebookRepository.deleteById(id);
         return deletedDto;
@@ -121,6 +152,53 @@ public class NotebookServiceImpl implements NotebookService {
             throw new RuntimeException("Node not found");
         }
         return node;
+    }
+
+    @Override
+    public String uploadImages(MultipartFile image, String notebookId, String nodeId) {
+        String extension = FilenameUtils.getExtension(image.getOriginalFilename());
+        String uuid = UUID.randomUUID().toString();
+        String filename = uuid + "." + extension;
+        String rawUsername = userService.getCurrentUser().getUsername();
+        String username = rawUsername.replaceAll("[^a-zA-Z0-9_-]", "_");
+
+        String baseDir = System.getProperty("user.home") + "/ylslc_images/notebook_images";
+        Path uploadDir = Paths.get(baseDir, username, notebookId, nodeId);
+        try {
+            Files.createDirectories(uploadDir);
+            Path filePath = uploadDir.resolve(filename);
+            image.transferTo(filePath.toFile());
+            return filename;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to save image", e);
+        }
+    }
+
+    @Override
+    public byte[] getImage(String notebookId, String nodeId, String imageId) {
+        try {
+            String rawUsername = userService.getCurrentUser().getUsername();
+            String username = rawUsername.replaceAll("[^a-zA-Z0-9_-]", "_");
+            Path imagePath = Paths.get(System.getProperty("user.home") + "/ylslc_images/notebook_images", username,
+                    notebookId, nodeId, imageId);
+            return Files.readAllBytes(imagePath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read image", e);
+        }
+    }
+
+    @Override
+    public void deleteImage(String notebookId, String nodeId, String imageId) {
+        try {
+            String rawUsername = userService.getCurrentUser().getUsername();
+            String username = rawUsername.replaceAll("[^a-zA-Z0-9_-]", "_");
+            Path imagePath = Paths.get(System.getProperty("user.home") + "/ylslc_images/notebook_images", username,
+                    notebookId, nodeId, imageId);
+            Files.deleteIfExists(imagePath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete image", e);
+        }
     }
 
     public NotebookServiceImpl(NotebookRepository notebookRepository,
