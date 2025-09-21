@@ -6,7 +6,7 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthenticatedNavbar from "../components/navbar/AuthenticatedNavbar";
 import Footer from "../components/Footer";
@@ -14,7 +14,6 @@ import { useUser } from "../context/userContext";
 import { UserHooks } from "../hooks/userHooks/UserHooks";
 import Welcome from "../components/dashboard_page/Welcome";
 import LeetCodeStats from "../components/dashboard_page/LeetCodeStats";
-import NotebookStats from "../components/dashboard_page/NotebookStats";
 import { grey } from "@mui/material/colors";
 import { axiosInstance } from "../config/axiosConfig";
 import moment from "moment";
@@ -271,19 +270,6 @@ const Dashboard = () => {
             }}
           >
             <LeetCodeStats userId={user.id} stats={stats} />
-            {/* Only show Notebook for PREPLUS and ADMIN users */}
-            {(user.role === "PREPLUS" || user.role === "ADMIN") && (
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                  gap: 3,
-                  width: "100%",
-                }}
-              >
-                <NotebookStats userId={user.id} />
-              </Box>
-            )}
           </Box>
         </Box>
       </Box>
