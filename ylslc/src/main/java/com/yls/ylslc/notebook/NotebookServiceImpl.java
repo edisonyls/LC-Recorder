@@ -1,5 +1,6 @@
 package com.yls.ylslc.notebook;
 
+import com.yls.ylslc.mappers.Mapper;
 import com.yls.ylslc.user.UserEntity;
 import com.yls.ylslc.user.UserService;
 import org.springframework.stereotype.Service;
@@ -14,22 +15,26 @@ public class NotebookServiceImpl implements NotebookService {
     private final NotebookRepository notebookRepository;
     private final UserService userService;
     private final NotebookTreeService treeService;
+    private final Mapper<NotebookEntity, NotebookDto> notebookMapper;
 
     @Override
-    public NotebookEntity createNotebook(NotebookEntity notebookEntity) {
+    public NotebookDto createNotebook(NotebookEntity notebookEntity) {
         UserEntity userEntity = userService.getCurrentUser();
         notebookEntity.setUser(userEntity);
-        return notebookRepository.save(notebookEntity);
+        NotebookEntity savedEntity = notebookRepository.save(notebookEntity);
+        return notebookMapper.mapTo(savedEntity);
     }
 
     @Override
-    public List<NotebookEntity> getNotebooks() {
+    public List<NotebookDto> getNotebooks() {
         UserEntity currentUser = userService.getCurrentUser();
 
         List<NotebookEntity> notebooks = notebookRepository.findByUser(currentUser);
         notebooks.sort(Comparator.comparing(NotebookEntity::getCreatedAt,
                 Comparator.nullsLast(Comparator.reverseOrder())));
-        return notebooks;
+        return notebooks.stream()
+                .map(notebookMapper::mapTo)
+                .toList();
     }
 
     @Override
@@ -38,19 +43,21 @@ public class NotebookServiceImpl implements NotebookService {
     }
 
     @Override
-    public NotebookEntity updateName(UUID id, String name) {
+    public NotebookDto updateName(UUID id, String name) {
         NotebookEntity notebookEntity = notebookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notebook not found"));
         notebookEntity.setName(name);
-        return notebookRepository.save(notebookEntity);
+        NotebookEntity savedEntity = notebookRepository.save(notebookEntity);
+        return notebookMapper.mapTo(savedEntity);
     }
 
     @Override
-    public NotebookEntity delete(UUID id) {
+    public NotebookDto delete(UUID id) {
         NotebookEntity notebookEntity = notebookRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notebook not found"));
+        NotebookDto deletedDto = notebookMapper.mapTo(notebookEntity);
         notebookRepository.deleteById(id);
-        return notebookEntity;
+        return deletedDto;
     }
 
     @Override
@@ -59,7 +66,7 @@ public class NotebookServiceImpl implements NotebookService {
     }
 
     @Override
-    public NotebookEntity addNode(UUID notebookId, String parentNodeId, NotebookNode node) {
+    public NotebookDto addNode(UUID notebookId, String parentNodeId, NotebookNode node) {
         NotebookEntity notebook = notebookRepository.findById(notebookId)
                 .orElseThrow(() -> new RuntimeException("Notebook not found"));
 
@@ -72,11 +79,12 @@ public class NotebookServiceImpl implements NotebookService {
             }
         }
 
-        return notebookRepository.save(notebook);
+        NotebookEntity savedEntity = notebookRepository.save(notebook);
+        return notebookMapper.mapTo(savedEntity);
     }
 
     @Override
-    public NotebookEntity updateNode(UUID notebookId, String nodeId, String name, String content) {
+    public NotebookDto updateNode(UUID notebookId, String nodeId, String name, String content) {
         NotebookEntity notebook = notebookRepository.findById(notebookId)
                 .orElseThrow(() -> new RuntimeException("Notebook not found"));
 
@@ -85,11 +93,12 @@ public class NotebookServiceImpl implements NotebookService {
             throw new RuntimeException("Node not found");
         }
 
-        return notebookRepository.save(notebook);
+        NotebookEntity savedEntity = notebookRepository.save(notebook);
+        return notebookMapper.mapTo(savedEntity);
     }
 
     @Override
-    public NotebookEntity deleteNode(UUID notebookId, String nodeId) {
+    public NotebookDto deleteNode(UUID notebookId, String nodeId) {
         NotebookEntity notebook = notebookRepository.findById(notebookId)
                 .orElseThrow(() -> new RuntimeException("Notebook not found"));
 
@@ -98,7 +107,8 @@ public class NotebookServiceImpl implements NotebookService {
             throw new RuntimeException("Node not found");
         }
 
-        return notebookRepository.save(notebook);
+        NotebookEntity savedEntity = notebookRepository.save(notebook);
+        return notebookMapper.mapTo(savedEntity);
     }
 
     @Override
@@ -115,9 +125,11 @@ public class NotebookServiceImpl implements NotebookService {
 
     public NotebookServiceImpl(NotebookRepository notebookRepository,
             UserService userService,
-            NotebookTreeService treeService) {
+            NotebookTreeService treeService,
+            Mapper<NotebookEntity, NotebookDto> notebookMapper) {
         this.notebookRepository = notebookRepository;
         this.userService = userService;
         this.treeService = treeService;
+        this.notebookMapper = notebookMapper;
     }
 }

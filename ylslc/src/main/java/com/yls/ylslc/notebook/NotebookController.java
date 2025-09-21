@@ -1,16 +1,12 @@
 package com.yls.ylslc.notebook;
 
 import com.yls.ylslc.config.response.Response;
-import com.yls.ylslc.user.UserEntity;
 import com.yls.ylslc.user.UserService;
 import com.yls.ylslc.mappers.Mapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,17 +28,14 @@ public class NotebookController {
 
     @GetMapping
     public Response getNotebooks() {
-        List<NotebookEntity> notebookEntities = notebookService.getNotebooks();
-        List<NotebookDto> notebookDtos = notebookEntities.stream().map(notebookMapper::mapTo)
-                .toList();
+        List<NotebookDto> notebookDtos = notebookService.getNotebooks();
         return Response.ok(notebookDtos, "Notebooks retrieved successfully!");
     }
 
     @PostMapping
     public Response createNotebook(@RequestBody NotebookDto notebookDto) {
         NotebookEntity notebookEntity = notebookMapper.mapFrom(notebookDto);
-        NotebookEntity savedNotebookEntity = notebookService.createNotebook(notebookEntity);
-        NotebookDto savedNotebookDto = notebookMapper.mapTo(savedNotebookEntity);
+        NotebookDto savedNotebookDto = notebookService.createNotebook(notebookEntity);
         return Response.ok(savedNotebookDto, "Notebook saved successfully!");
     }
 
@@ -53,15 +46,13 @@ public class NotebookController {
         if (!notebookService.isExist(id)) {
             return Response.failed(HttpStatus.NOT_FOUND, "Notebook not found!");
         }
-        NotebookEntity updatedNotebook = notebookService.updateName(id, name);
-        NotebookDto updatedNotebookDto = notebookMapper.mapTo(updatedNotebook);
+        NotebookDto updatedNotebookDto = notebookService.updateName(id, name);
         return Response.ok(updatedNotebookDto, "Name for the notebook is updated successfully!");
     }
 
     @DeleteMapping(path = "/{id}")
     public Response deleteNotebook(@PathVariable("id") UUID id) {
-        NotebookEntity notebookEntity = notebookService.delete(id);
-        NotebookDto deletedNotebook = notebookMapper.mapTo(notebookEntity);
+        NotebookDto deletedNotebook = notebookService.delete(id);
         return Response.ok(deletedNotebook, deletedNotebook.getName() + " deleted!");
     }
 
@@ -74,8 +65,7 @@ public class NotebookController {
     public Response addNode(@PathVariable("id") UUID notebookId,
             @RequestParam(required = false) String parentNodeId,
             @RequestBody NotebookNode node) {
-        NotebookEntity updated = notebookService.addNode(notebookId, parentNodeId, node);
-        NotebookDto updatedDto = notebookMapper.mapTo(updated);
+        NotebookDto updatedDto = notebookService.addNode(notebookId, parentNodeId, node);
         return Response.ok(updatedDto, "Node added successfully!");
     }
 
@@ -85,16 +75,14 @@ public class NotebookController {
             @RequestBody Map<String, String> updateRequest) {
         String name = updateRequest.get("name");
         String content = updateRequest.get("content");
-        NotebookEntity updated = notebookService.updateNode(notebookId, nodeId, name, content);
-        NotebookDto updatedDto = notebookMapper.mapTo(updated);
+        NotebookDto updatedDto = notebookService.updateNode(notebookId, nodeId, name, content);
         return Response.ok(updatedDto, "Node updated successfully!");
     }
 
     @DeleteMapping(path = "/{id}/node/{nodeId}")
     public Response deleteNode(@PathVariable("id") UUID notebookId,
             @PathVariable("nodeId") String nodeId) {
-        NotebookEntity updated = notebookService.deleteNode(notebookId, nodeId);
-        NotebookDto updatedDto = notebookMapper.mapTo(updated);
+        NotebookDto updatedDto = notebookService.deleteNode(notebookId, nodeId);
         return Response.ok(updatedDto, "Node deleted successfully!");
     }
 

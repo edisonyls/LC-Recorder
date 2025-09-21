@@ -4,23 +4,23 @@ import java.util.List;
 import java.util.UUID;
 
 public interface NotebookService {
-    NotebookEntity createNotebook(NotebookEntity notebookEntity);
+    NotebookDto createNotebook(NotebookEntity notebookEntity);
 
-    List<NotebookEntity> getNotebooks();
+    List<NotebookDto> getNotebooks();
 
     boolean isExist(UUID id);
 
-    NotebookEntity updateName(UUID id, String name);
+    NotebookDto updateName(UUID id, String name);
 
-    NotebookEntity delete(UUID id);
+    NotebookDto delete(UUID id);
 
     Long countNotebook(UUID userId);
 
-    NotebookEntity addNode(UUID notebookId, String parentNodeId, NotebookNode node);
+    NotebookDto addNode(UUID notebookId, String parentNodeId, NotebookNode node);
 
-    NotebookEntity updateNode(UUID notebookId, String nodeId, String name, String content);
+    NotebookDto updateNode(UUID notebookId, String nodeId, String name, String content);
 
-    NotebookEntity deleteNode(UUID notebookId, String nodeId);
+    NotebookDto deleteNode(UUID notebookId, String nodeId);
 
     NotebookNode findNode(UUID notebookId, String nodeId);
 }
