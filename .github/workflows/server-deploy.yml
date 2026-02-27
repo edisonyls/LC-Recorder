@@ -23,7 +23,7 @@ jobs:
       - name: Build Spring Boot Application
         run: |
           cd "$GITHUB_WORKSPACE/ylslc"
-          ../mvnw clean package -DskipTests
+          ./mvnw clean package -DskipTests
 
       - name: Deploy to production server
         env:
