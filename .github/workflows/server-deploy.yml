@@ -28,12 +28,7 @@ jobs:
       - name: Deploy to production server
         env:
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
-          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          UPGRADE_SECRET_KEY: ${{ secrets.UPGRADE_SECRET_KEY }}
-          MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+
         run: |
           # Create deployment directory if it doesn't exist
           mkdir -p "$DEPLOY_PATH"
@@ -48,14 +43,14 @@ jobs:
 
           # Create environment file for systemd service
           echo "Creating environment configuration..."
-          cat > "$DEPLOY_PATH/.env" <<EOF
-          DATABASE_NAME=$DATABASE_NAME
-          DATABASE_USERNAME=$DATABASE_USERNAME
-          DATABASE_PASSWORD=$DATABASE_PASSWORD
-          JWT_SECRET=$JWT_SECRET
-          UPGRADE_SECRET_KEY=$UPGRADE_SECRET_KEY
-          MYSQL_HOST=$MYSQL_HOST
-          EOF
+          cat > "$DEPLOY_PATH/.env" << EOF
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            UPGRADE_SECRET_KEY=${{ secrets.UPGRADE_SECRET_KEY }}
+            MYSQL_HOST=${{ secrets.MYSQL_HOST }}
+            EOF
 
           echo "Deployment completed successfully!"
 
