@@ -48,7 +48,7 @@ jobs:
 
           # Create environment file for systemd service
           echo "Creating environment configuration..."
-          sudo tee "$DEPLOY_PATH/.env" > /dev/null <<EOF
+          cat > "$DEPLOY_PATH/.env" <<EOF
           DATABASE_NAME=$DATABASE_NAME
           DATABASE_USERNAME=$DATABASE_USERNAME
           DATABASE_PASSWORD=$DATABASE_PASSWORD
