@@ -44,13 +44,13 @@ jobs:
           # Create environment file for systemd service
           echo "Creating environment configuration..."
           cat > "$DEPLOY_PATH/.env" << EOF
-            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
-            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-            JWT_SECRET=${{ secrets.JWT_SECRET }}
-            UPGRADE_SECRET_KEY=${{ secrets.UPGRADE_SECRET_KEY }}
-            MYSQL_HOST=${{ secrets.MYSQL_HOST }}
-            EOF
+DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+JWT_SECRET=${{ secrets.JWT_SECRET }}
+UPGRADE_SECRET_KEY=${{ secrets.UPGRADE_SECRET_KEY }}
+MYSQL_HOST=${{ secrets.MYSQL_HOST }}
+EOF
 
           echo "Deployment completed successfully!"
 
