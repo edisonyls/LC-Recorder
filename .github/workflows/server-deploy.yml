@@ -9,32 +9,57 @@ on:
       - ".github/workflows/server-deploy.yml"
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  deploy-prod:
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Deploy to Remote VM via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          password: ${{ secrets.CLIENT_HOST_PASSWORD }}
-          port: ${{ secrets.VM_SERVER_PORT }}
-          script: |
-            export DATABASE_USERNAME="${{ secrets.DATABASE_USERNAME }}"
-            export DATABASE_PASSWORD="${{ secrets.DATABASE_PASSWORD }}"
-            export JWT_SECRET="${{ secrets.JWT_SECRET }}"
-            export UPGRADE_SECRET_KEY="${{ secrets.UPGRADE_SECRET_KEY }}"
+      - name: Stop service
+        run: |
+          sudo systemctl stop lc-recorder
 
-            cd /home/edisonyls/LC-Recorder
-            git pull
-            cd ylslc
-            ./mvnw clean package
-            cd target
-            rm ylslc-0.0.1-SNAPSHOT.jar.original || true
-            cd ..
-            sudo cp target/ylslc-0.0.1-SNAPSHOT.jar /opt/ylslc/ylslc-0.0.1-SNAPSHOT.jar
-            sudo systemctl restart ylslc.service
+      - name: Build Spring Boot Application
+        run: |
+          cd "$GITHUB_WORKSPACE/ylslc"
+          ../mvnw clean package -DskipTests
+
+      - name: Deploy to production server
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          UPGRADE_SECRET_KEY: ${{ secrets.UPGRADE_SECRET_KEY }}
+          MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+        run: |
+          # Create deployment directory if it doesn't exist
+          mkdir -p "$DEPLOY_PATH"
+
+          # Clean deployment directory
+          echo "Cleaning deployment directory..."
+          rm -rf "$DEPLOY_PATH"/*
+
+          # Copy JAR file to deployment directory
+          echo "Copying application JAR..."
+          cp "$GITHUB_WORKSPACE/ylslc/target/ylslc-0.0.1-SNAPSHOT.jar" "$DEPLOY_PATH/app.jar"
+
+          # Create environment file for systemd service
+          echo "Creating environment configuration..."
+          sudo tee "$DEPLOY_PATH/.env" > /dev/null <<EOF
+          DATABASE_NAME=$DATABASE_NAME
+          DATABASE_USERNAME=$DATABASE_USERNAME
+          DATABASE_PASSWORD=$DATABASE_PASSWORD
+          JWT_SECRET=$JWT_SECRET
+          UPGRADE_SECRET_KEY=$UPGRADE_SECRET_KEY
+          MYSQL_HOST=$MYSQL_HOST
+          EOF
+
+          echo "Deployment completed successfully!"
+
+      - name: Start service
+        run: |
+          sudo systemctl start lc-recorder
+          sudo systemctl status lc-recorder --no-pager
