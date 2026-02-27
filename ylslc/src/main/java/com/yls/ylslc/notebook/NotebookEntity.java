@@ -37,6 +37,7 @@ public class NotebookEntity {
     @JsonBackReference
     private UserEntity user;
 
+    @Builder.Default
     @Column(columnDefinition = "json")
     @JdbcTypeCode(SqlTypes.JSON)
     private List<NotebookNode> contentTree = new ArrayList<>();
