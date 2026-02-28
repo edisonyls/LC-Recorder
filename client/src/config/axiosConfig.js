@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const token = JSON.parse(localStorage.getItem("user"));
-const API_ENDPOINT = process.env.REACT_APP_API_ENDPOINT;
+const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT;
 
 const axiosInstanceNoAuth = axios.create({
   baseURL: API_ENDPOINT,
