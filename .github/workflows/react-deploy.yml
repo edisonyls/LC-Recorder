@@ -25,4 +25,4 @@ jobs:
             npm install
             npm run build
             sudo rm -rf /var/www/ylslc
-            sudo mv build /var/www/ylslc
+            sudo mv dist /var/www/ylslc
