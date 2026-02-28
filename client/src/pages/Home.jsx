@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import HomeNavbar from "../components/navbar/HomeNavbar";
 import { styled } from "@mui/material/styles";
@@ -140,7 +139,8 @@ function Home() {
                     sx={{
                       top: -20,
                       right: -20,
-                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                      background: `linear-gradient(135deg, #1F2937 0%, #111111 100%)`,
+                      border: `1px solid rgba(255, 255, 255, 0.15)`,
                     }}
                   >
                     <Box
@@ -196,9 +196,7 @@ function Home() {
                   viewport={{ once: true }}
                 >
                   <FeatureCard>
-                    <FeatureIcon sx={{ background: feature.gradient }}>
-                      {feature.icon}
-                    </FeatureIcon>
+                    <FeatureIcon>{feature.icon}</FeatureIcon>
                     <Typography
                       variant="h5"
                       sx={{
@@ -286,10 +284,7 @@ function Home() {
                       sx={{
                         fontWeight: 700,
                         mb: 3,
-                        background: `linear-gradient(135deg, ${feature.gradient})`,
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
+                        color: "#FFFFFF",
                       }}
                     >
                       {feature.title}
@@ -418,21 +413,18 @@ const features = [
     title: "Problem Tracking",
     description:
       "Record every LeetCode problem you solve with detailed information including time spent, attempts, and success status.",
-    gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
   },
   {
     icon: <InsightsIcon sx={{ fontSize: 32 }} />,
     title: "Progress Analytics",
     description:
       "View comprehensive statistics and charts showing your solving patterns, difficulty distribution, and improvement over time.",
-    gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
   },
   {
     icon: <GroupIcon sx={{ fontSize: 32 }} />,
     title: "Notebooks",
     description:
       "Take comprehensive notes on data structures and algorithms you've studied, with organized sections for concepts, implementations, and examples for easy reference.",
-    gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
   },
 ];
 
@@ -442,7 +434,6 @@ const featureShowcases = [
     description:
       "Get comprehensive insights into your coding journey with detailed analytics and progress tracking.",
     image: DashboardImage,
-    gradient: "#667eea 0%, #764ba2 100%",
     benefits: [
       "Visual progress charts and statistics",
       "Track your solving patterns over time",
@@ -455,7 +446,6 @@ const featureShowcases = [
     description:
       "Keep detailed records of every LeetCode problem you solve with comprehensive metadata and solutions.",
     image: CodeDetailsImage,
-    gradient: "#f093fb 0%, #f5576c 100%",
     benefits: [
       "Record time spent on each problem",
       "Track multiple solution attempts",
@@ -468,7 +458,6 @@ const featureShowcases = [
     description:
       "Build your personal knowledge base by taking detailed notes on any topic you're learning, with easy access whenever you need to review.",
     image: NotebookImage,
-    gradient: "#4facfe 0%, #00f2fe 100%",
     benefits: [
       "Create organized notes for each concept",
       "Add your own examples and implementations",
@@ -561,7 +550,9 @@ const FeatureIcon = styled(Box)(({ theme }) => ({
   alignItems: "center",
   justifyContent: "center",
   marginBottom: theme.spacing(3),
-  color: "#FFFFFF",
+  color: theme.palette.text.primary,
+  background: theme.palette.background.elevated,
+  border: `1px solid ${theme.palette.divider}`,
 }));
 
 // New styled components for the features showcase
