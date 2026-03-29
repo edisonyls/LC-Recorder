@@ -10,19 +10,39 @@ on:
 
 jobs:
   deploy-frontend:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, client]
     steps:
-      - name: Deploy to Frontend VM
-        uses: appleboy/ssh-action@v1
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          password: ${{ secrets.CLIENT_HOST_PASSWORD }}
-          port: ${{ secrets.VM_CLIENT_PORT }}
-          script: |
-            cd /home/edisonyls/LeetCodeRecorder/client
-            git pull --no-rebase
-            npm install
-            npm run build
-            sudo rm -rf /var/www/ylslc
-            sudo mv dist /var/www/ylslc
+          node-version: "24"
+
+      - name: Install dependencies
+        run: |
+          cd client
+          npm install
+
+      - name: Build application
+        working-directory: client
+        env:
+          VITE_API_ENDPOINT: ${{ secrets.VITE_API_ENDPOINT }}
+        run: npm run build
+
+      - name: Deploy to server
+        working-directory: client
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          sudo rm -rf "$DEPLOY_PATH"
+          sudo mkdir -p "$DEPLOY_PATH"
+          sudo cp -r dist/* "$DEPLOY_PATH/"
+
+          # Set proper permissions
+          sudo chown -R www-data:www-data "$DEPLOY_PATH"
+          sudo chmod -R 755 "$DEPLOY_PATH"
+
+          # Restart nginx to ensure changes take effect
+          sudo systemctl restart nginx
