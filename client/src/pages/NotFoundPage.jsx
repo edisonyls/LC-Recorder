@@ -1,11 +1,18 @@
 import { Box, Typography } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import AuthenticatedNavbar from "../components/navbar/AuthenticatedNavbar";
 import Footer from "../components/Footer";
 import { BlackBackgroundButton } from "../components/generic/GenericButton";
 import { Link } from "react-router-dom";
+import { UserHooks } from "../hooks/userHooks/UserHooks";
 
 const NotFoundPage = () => {
+  const { getCurrentUser } = UserHooks();
+
+  useEffect(() => {
+    getCurrentUser();
+  }, []); // eslint-disable-line
+
   return (
     <Box
       sx={{

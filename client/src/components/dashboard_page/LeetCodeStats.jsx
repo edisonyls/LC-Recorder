@@ -1,313 +1,511 @@
-import React, { useEffect, useState } from "react";
-import { Typography, Box, Divider, IconButton } from "@mui/material";
-import { useSpring, animated } from "react-spring";
+import React, { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  CircularProgress,
+  Grid,
+  LinearProgress,
+  useTheme,
+} from "@mui/material";
 import { axiosInstance } from "../../config/axiosConfig";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { useNavigate } from "react-router-dom";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import CodeIcon from "@mui/icons-material/Code";
+import TimerIcon from "@mui/icons-material/Timer";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import moment from "moment";
 import CalendarHeatmap from "react-calendar-heatmap";
 import "react-calendar-heatmap/dist/styles.css";
-import ReactTooltip from "react-tooltip";
+import { Tooltip } from "react-tooltip";
 
-const LeetCodeStats = ({ userId }) => {
-  const [questionStats, setQuestionStats] = useState({
-    difficultyDistribution: [],
-    createdAtStats: [],
-    successDistribution: [],
-    starredCount: 0,
-    questionCount: 0,
-    averageTimeOfCompletion: [],
-  });
-
-  const navigate = useNavigate();
+const LeetCodeStats = ({ userId, stats: propsStats }) => {
+  const theme = useTheme();
+  const [stats, setStats] = useState(propsStats);
+  const [loading, setLoading] = useState(!propsStats);
 
   useEffect(() => {
-    const fetchData = async () => {
+    if (propsStats) {
+      setStats(propsStats);
+      setLoading(false);
+      return;
+    }
+
+    const fetchStats = async () => {
       try {
-        const response = await axiosInstance.get(`question/stats/${userId}`);
-        setQuestionStats(response.data.data);
-      } catch (err) {
-        console.log("Error while fetching the question stats: " + err);
+        const response = await axiosInstance.get(`/question/stats/${userId}`);
+        const actualStats = response.data.data || response.data;
+        setStats(actualStats);
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchData();
-  }, [userId]);
 
-  const containerSpring = useSpring({
-    opacity: 1,
-    from: { opacity: 0 },
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-    padding: "16px",
-    textAlign: "center",
-    width: "98%",
-    boxSizing: "border-box",
-    margin: "10px",
-    delay: 500,
-  });
+    if (userId) {
+      fetchStats();
+    }
+  }, [userId, propsStats]);
 
-  const itemSpring = useSpring({
-    opacity: 1,
-    transform: "translateX(0)",
-    from: { opacity: 0, transform: "translateX(50px)" },
-    delay: 700,
-    flex: 1,
-    textAlign: "center",
-    margin: "0 10px",
-    padding: "10px",
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-  });
-
-  const chartSpring1 = useSpring({
-    opacity: 1,
-    transform: "scale(1)",
-    from: { opacity: 0, transform: "scale(0.8)" },
-    delay: 900,
-    flex: 1,
-  });
-  const chartSpring2 = useSpring({
-    opacity: 1,
-    transform: "scale(1)",
-    from: { opacity: 0, transform: "scale(0.8)" },
-    delay: 1100,
-    flex: 1,
-  });
-  const chartSpring3 = useSpring({
-    opacity: 1,
-    transform: "scale(1)",
-    from: { opacity: 0, transform: "scale(0.8)" },
-    delay: 1300,
-    flex: 1,
-  });
-
-  const difficultyChartOptions = {
-    chart: {
-      type: "donut",
-    },
-    colors:
-      questionStats.difficultyDistribution.length > 0
-        ? questionStats.difficultyDistribution.map((item) => {
-            switch (item.difficulty) {
-              case "Easy":
-                return "#4CAF50";
-              case "Medium":
-                return "#FF9800";
-              case "Hard":
-                return "#F44336";
-              default:
-                return "#8884d8";
-            }
-          })
-        : ["#8884d8"],
-    labels:
-      questionStats.difficultyDistribution.length > 0
-        ? questionStats.difficultyDistribution.map((item) => item.difficulty)
-        : ["No Data"],
-    legend: {
-      labels: {
-        colors: "white",
-      },
-      position: "bottom",
-    },
-    title: {
-      text: "Difficulty Distribution",
-      align: "center",
-      style: {
-        fontSize: "14px",
-        color: "cyan",
-      },
-    },
-    responsive: [
-      {
-        breakpoint: 480,
-        options: {
-          chart: {
-            width: 150,
-          },
-          legend: {
-            position: "bottom",
-          },
-        },
-      },
-    ],
-  };
-
-  const difficultyChartSeries =
-    questionStats.difficultyDistribution.length > 0
-      ? questionStats.difficultyDistribution.map((item) => item.count)
-      : [0];
-
-  const successChartOptions = {
-    chart: {
-      type: "donut",
-    },
-    colors:
-      questionStats.difficultyDistribution.length > 0
-        ? ["#4CAF50", "#F44336"]
-        : ["#8884d8"],
-    labels:
-      questionStats.successDistribution.length > 0
-        ? ["Success", "Failure"]
-        : ["No Data"],
-    legend: {
-      labels: {
-        colors: "white",
-      },
-      position: "bottom",
-    },
-    title: {
-      text: "Success Distribution",
-      align: "center",
-      style: {
-        fontSize: "14px",
-        color: "cyan",
-      },
-    },
-    responsive: [
-      {
-        breakpoint: 480,
-        options: {
-          chart: {
-            width: 150,
-          },
-          legend: {
-            position: "bottom",
-          },
-        },
-      },
-    ],
-  };
-
-  const successChartSeries =
-    questionStats.successDistribution.length > 0
-      ? questionStats.successDistribution.map((item) => item.count)
-      : [0];
-
-  const renderAverageTime = () => {
-    const difficulties = ["Easy", "Medium", "Hard"];
-
-    return difficulties.map((difficulty) => {
-      const stat = questionStats.averageTimeOfCompletion.find(
-        (item) => item.difficulty === difficulty
-      );
-      return (
-        <animated.div key={difficulty} style={itemSpring}>
-          <Typography variant="body1" sx={{ color: "#fff", fontSize: "16px" }}>
-            Average Time for {difficulty} Questions
-          </Typography>
-          <Typography variant="body1" sx={{ color: "white", fontSize: "14px" }}>
-            {stat ? `${stat.averageTime} mins` : "N/A"}
-          </Typography>
-        </animated.div>
-      );
-    });
-  };
-
-  return (
-    <animated.div style={containerSpring}>
+  if (loading) {
+    return (
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "center",
           alignItems: "center",
-          color: "white",
+          height: 400,
         }}
       >
-        <Box sx={{ flexGrow: 1, textAlign: "center" }}>
-          <Typography variant="h5">LeetCode Stats</Typography>
-        </Box>
-        <IconButton
-          sx={{
-            color: "white",
-            "&:hover": {
-              backgroundColor: "white",
-              color: "black",
-            },
-            fontSize: "1.8rem",
-          }}
-          onClick={() => navigate("/table")}
-        >
-          <ArrowForwardIcon sx={{ fontSize: "inherit" }} />
-        </IconButton>
+        <CircularProgress />
       </Box>
-      <Box sx={{ textAlign: "left" }}>
-        <Typography variant="body1" sx={{ color: "cyan" }}>
-          Total Questions You Have Recorded:{" "}
-          <span
-            style={{
-              padding: "2px 5px",
-              borderRadius: "5px",
-              backgroundColor: "limegreen",
-              color: "black",
-              display: "inline-block",
+    );
+  }
+
+  if (!stats) {
+    return (
+      <Card sx={{ mb: 4 }}>
+        <CardContent>
+          <Typography variant="h6" color="text.secondary">
+            No statistics available yet
+          </Typography>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const difficultyData = [
+    {
+      name: "Easy",
+      value:
+        stats.difficultyDistribution?.find((d) => d.difficulty === "Easy")
+          ?.count || 0,
+      color: theme.palette.success.main,
+    },
+    {
+      name: "Medium",
+      value:
+        stats.difficultyDistribution?.find((d) => d.difficulty === "Medium")
+          ?.count || 0,
+      color: theme.palette.warning.main,
+    },
+    {
+      name: "Hard",
+      value:
+        stats.difficultyDistribution?.find((d) => d.difficulty === "Hard")
+          ?.count || 0,
+      color: theme.palette.error.main,
+    },
+  ];
+
+  const totalProblems = stats.questionCount || 0;
+  const solvedProblems =
+    stats.successDistribution?.find((s) => s.success === 1)?.count || 0;
+  const successRate =
+    totalProblems > 0 ? (solvedProblems / totalProblems) * 100 : 0;
+
+  // Calculate average time across all difficulties
+  const avgTime = (() => {
+    if (
+      !stats.averageTimeOfCompletion ||
+      stats.averageTimeOfCompletion.length === 0
+    ) {
+      return 0;
+    }
+
+    const difficultyCounts = stats.difficultyDistribution || [];
+
+    let totalTimeMinutes = 0;
+    let totalProblems = 0;
+
+    stats.averageTimeOfCompletion.forEach((item) => {
+      const difficultyCount =
+        difficultyCounts.find((d) => d.difficulty === item.difficulty)?.count ||
+        0;
+
+      // Convert time from "MM:SS" format to minutes
+      let timeInMinutes = 0;
+      if (item.averageTime && typeof item.averageTime === "string") {
+        const [minutes, seconds] = item.averageTime.split(":").map(Number);
+        timeInMinutes = minutes + seconds / 60;
+      } else if (typeof item.averageTime === "number") {
+        timeInMinutes = item.averageTime;
+      }
+
+      totalTimeMinutes += timeInMinutes * difficultyCount;
+      totalProblems += difficultyCount;
+    });
+
+    return totalProblems > 0 ? totalTimeMinutes / totalProblems : 0;
+  })();
+
+  const StatCard = ({ icon, title, value, subtitle, color }) => (
+    <Card
+      sx={{
+        height: "100%",
+        background: `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`,
+        border: `1px solid ${color}30`,
+        transition: "all 0.3s ease",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          boxShadow: `0 8px 24px ${color}20`,
+        },
+      }}
+    >
+      <CardContent>
+        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+          <Box
+            sx={{
+              p: 1,
+              borderRadius: 2,
+              backgroundColor: `${color}20`,
+              color: color,
+              mr: 2,
             }}
           >
-            {questionStats.questionCount}
-          </span>
-        </Typography>
-        <Typography variant="body1" sx={{ color: "cyan" }}>
-          Total Starred Questions:{" "}
-          <span
-            style={{
-              padding: "2px 5px",
-              borderRadius: "5px",
-              backgroundColor: "gold",
-              color: "black",
-              display: "inline-block",
-            }}
-          >
-            {questionStats.starredCount}
-          </span>
-        </Typography>
-        <Box
+            {icon}
+          </Box>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            {title}
+          </Typography>
+        </Box>
+        <Typography
+          variant="h3"
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginTop: "10px",
+            fontWeight: 700,
+            color: color,
+            mb: 1,
           }}
         >
-          {renderAverageTime()}
-        </Box>
-      </Box>
+          {value}
+        </Typography>
+        {subtitle && (
+          <Typography variant="body2" color="text.primary">
+            {subtitle}
+          </Typography>
+        )}
+      </CardContent>
+    </Card>
+  );
 
-      <Divider />
-
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mt={2}
+  return (
+    <Box sx={{ mb: 3 }}>
+      <Typography
+        variant="h5"
+        sx={{
+          fontWeight: 700,
+          mb: 3,
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+        }}
       >
-        <animated.div style={chartSpring1}>
-          <animated.div style={chartSpring1}>
-            <animated.div style={chartSpring1}>
+        <CodeIcon sx={{ color: theme.palette.primary.main }} />
+        LeetCode Statistics
+      </Typography>
+
+      <Grid container spacing={3} sx={{ mb: 2 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard
+            icon={<CodeIcon />}
+            title="Total Problems"
+            value={totalProblems}
+            subtitle="All time"
+            color={theme.palette.primary.main}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard
+            icon={<EmojiEventsIcon />}
+            title="Solved"
+            value={solvedProblems}
+            subtitle={`${successRate.toFixed(1)}% success rate`}
+            color={theme.palette.success.main}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard
+            icon={<TimerIcon />}
+            title="Avg Time"
+            value={`${Math.round(avgTime)}m`}
+            subtitle="Per problem"
+            color={theme.palette.info.main}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard
+            icon={<TrendingUpIcon />}
+            title="Starred"
+            value={stats.starredCount || 0}
+            subtitle="Favorite problems"
+            color={theme.palette.warning.main}
+          />
+        </Grid>
+      </Grid>
+
+      <Grid container spacing={3} sx={{ mb: 2 }}>
+        {/* Difficulty Distribution Chart */}
+        <Grid item xs={12} md={4}>
+          <Card sx={{ height: "100%" }}>
+            <CardContent>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                Difficulty Distribution
+              </Typography>
+              {difficultyData.some((item) => item.value > 0) ? (
+                <Chart
+                  options={{
+                    chart: {
+                      type: "donut",
+                    },
+                    colors: difficultyData.map((item) => item.color),
+                    labels: difficultyData.map((item) => item.name),
+                    legend: {
+                      position: "bottom",
+                      labels: {
+                        colors: "white",
+                      },
+                    },
+                    dataLabels: {
+                      enabled: true,
+                      formatter: function (val) {
+                        return Math.round(val) + "%";
+                      },
+                    },
+                    plotOptions: {
+                      pie: {
+                        donut: {
+                          size: "65%",
+                        },
+                      },
+                    },
+                  }}
+                  series={difficultyData.map((item) => item.value)}
+                  type="donut"
+                  height={250}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: 250,
+                    color: theme.palette.text.secondary,
+                  }}
+                >
+                  <Typography variant="body2">No data available</Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Success vs Failure Chart */}
+        <Grid item xs={12} md={4}>
+          <Card sx={{ height: "100%" }}>
+            <CardContent>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                Success Rate
+              </Typography>
+              {stats.successDistribution &&
+              stats.successDistribution.length > 0 ? (
+                <Chart
+                  options={{
+                    chart: {
+                      type: "donut",
+                    },
+                    colors: [
+                      theme.palette.success.main,
+                      theme.palette.error.main,
+                    ],
+                    labels: ["Solved", "Unsolved"],
+                    legend: {
+                      position: "bottom",
+                      labels: {
+                        colors: "white",
+                      },
+                    },
+                    dataLabels: {
+                      enabled: true,
+                      formatter: function (val) {
+                        return Math.round(val) + "%";
+                      },
+                    },
+                    plotOptions: {
+                      pie: {
+                        donut: {
+                          size: "65%",
+                        },
+                      },
+                    },
+                  }}
+                  series={[
+                    stats.successDistribution.find((s) => s.success === 1)
+                      ?.count || 0,
+                    stats.successDistribution.find((s) => s.success === 0)
+                      ?.count || 0,
+                  ]}
+                  type="donut"
+                  height={250}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: 250,
+                    color: theme.palette.text.secondary,
+                  }}
+                >
+                  <Typography variant="body2">No data available</Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Average Time by Difficulty Chart */}
+        <Grid item xs={12} md={4}>
+          <Card sx={{ height: "100%" }}>
+            <CardContent>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                Average Time by Difficulty
+              </Typography>
+              {stats.averageTimeOfCompletion &&
+              stats.averageTimeOfCompletion.length > 0 ? (
+                <Chart
+                  options={{
+                    chart: {
+                      type: "bar",
+                    },
+                    colors: [
+                      theme.palette.success.main,
+                      theme.palette.warning.main,
+                      theme.palette.error.main,
+                    ],
+                    xaxis: {
+                      categories: stats.averageTimeOfCompletion.map(
+                        (item) => item.difficulty,
+                      ),
+                      labels: {
+                        style: {
+                          colors: "white",
+                        },
+                      },
+                    },
+                    yaxis: {
+                      title: {
+                        text: "Time (minutes)",
+                      },
+                      labels: {
+                        style: {
+                          colors: "white",
+                        },
+                      },
+                    },
+                    dataLabels: {
+                      enabled: true,
+                      formatter: function (val) {
+                        return Math.round(val) + "m";
+                      },
+                    },
+                    tooltip: {
+                      enabled: false,
+                    },
+                    plotOptions: {
+                      bar: {
+                        borderRadius: 4,
+                        horizontal: false,
+                      },
+                    },
+                  }}
+                  series={[
+                    {
+                      name: "Average Time",
+                      data: stats.averageTimeOfCompletion.map((item) => {
+                        // Convert time from "MM:SS" format to minutes
+                        let timeInMinutes = 0;
+                        if (
+                          item.averageTime &&
+                          typeof item.averageTime === "string"
+                        ) {
+                          const [minutes, seconds] = item.averageTime
+                            .split(":")
+                            .map(Number);
+                          timeInMinutes = minutes + seconds / 60;
+                        } else if (typeof item.averageTime === "number") {
+                          timeInMinutes = item.averageTime;
+                        }
+                        return Math.round(timeInMinutes);
+                      }),
+                    },
+                  ]}
+                  type="bar"
+                  height={250}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: 250,
+                    color: theme.palette.text.secondary,
+                  }}
+                >
+                  <Typography variant="body2">No data available</Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      <Grid container spacing={3} sx={{ mb: 2 }}>
+        {/* Activity Heatmap - now full width */}
+        <Grid item xs={12} md={12}>
+          <Card sx={{ height: "auto", minHeight: "200px" }}>
+            <CardContent>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+                Activity Heatmap
+              </Typography>
               <Box
                 sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  "& .react-calendar-heatmap": {
+                    width: "100%",
+                    maxWidth: "600px",
+                    margin: "0 auto",
+                  },
                   "& .react-calendar-heatmap text": {
                     fill: "white",
-                    fontSize: "10px",
+                    fontSize: "6px",
                   },
                   "& .react-calendar-heatmap .color-empty": {
-                    fill: "#dcdcdc",
+                    fill: "#fff",
                   },
                   "& .react-calendar-heatmap .color-github-1": {
-                    fill: "#b5d5c5",
+                    fill: "#9be9a8",
                   },
                   "& .react-calendar-heatmap .color-github-2": {
-                    fill: "#73c2a1",
+                    fill: "#40c463",
                   },
                   "& .react-calendar-heatmap .color-github-3": {
-                    fill: "#3b9c80",
+                    fill: "#30a14e",
                   },
                   "& .react-calendar-heatmap .color-github-4": {
-                    fill: "#15695c",
+                    fill: "#216e39",
                   },
                   "& .react-calendar-heatmap rect": {
                     pointerEvents: "auto",
                     cursor: "default",
+                    width: "8px",
+                    height: "8px",
                   },
                   "& .react-calendar-heatmap rect:focus": {
                     outline: "none",
@@ -321,10 +519,9 @@ const LeetCodeStats = ({ userId }) => {
                     backgroundColor: "#333",
                     color: "white",
                     borderRadius: "4px",
-                    padding: "10px 10px",
-                    fontSize: "12px",
+                    padding: "6px 6px",
+                    fontSize: "10px",
                     textAlign: "center",
-
                     whiteSpace: "nowrap",
                   },
                 }}
@@ -332,7 +529,7 @@ const LeetCodeStats = ({ userId }) => {
                 <CalendarHeatmap
                   startDate={moment().subtract(6, "months").toDate()}
                   endDate={new Date()}
-                  values={questionStats.createdAtStats.map((item) => ({
+                  values={stats.createdAtStats.map((item) => ({
                     date: item.dateOfCompletion,
                     count: item.count,
                   }))}
@@ -344,98 +541,131 @@ const LeetCodeStats = ({ userId }) => {
                     return "color-github-1";
                   }}
                   tooltipDataAttrs={(value) => ({
-                    "data-tip": value.date
+                    "data-tooltip-id": "heatmap-tooltip",
+                    "data-tooltip-content": value.date
                       ? `${value.count} questions recorded on ${moment(
-                          value.date
+                          value.date,
                         ).format("MMM Do")}`
                       : "No question recorded",
                   })}
                 />
-                <ReactTooltip
-                  place="top"
-                  type="dark"
-                  effect="solid"
-                  offset={{ top: 8 }}
-                />
+                <Tooltip id="heatmap-tooltip" place="top" />
                 <Box
-                  mt={2}
+                  mt={1}
                   sx={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: "8px",
+                    gap: "4px",
                     flexWrap: "wrap",
                     fontSize: "12px",
-                    color: "white",
+                    color: "#fff",
                   }}
                 >
                   <span>Less</span>
                   <Box
                     sx={{
-                      width: "12px",
-                      height: "12px",
-                      backgroundColor: "#dcdcdc",
-                      borderRadius: "2px",
+                      width: "8px",
+                      height: "8px",
+                      backgroundColor: "#fff",
+                      borderRadius: "1px",
                     }}
                   />
                   <Box
                     sx={{
-                      width: "12px",
-                      height: "12px",
-                      backgroundColor: "#b5d5c5",
-                      borderRadius: "2px",
+                      width: "8px",
+                      height: "8px",
+                      backgroundColor: "#9be9a8",
+                      borderRadius: "1px",
                     }}
                   />
                   <Box
                     sx={{
-                      width: "12px",
-                      height: "12px",
-                      backgroundColor: "#73c2a1",
-                      borderRadius: "2px",
+                      width: "8px",
+                      height: "8px",
+                      backgroundColor: "#40c463",
+                      borderRadius: "1px",
                     }}
                   />
                   <Box
                     sx={{
-                      width: "12px",
-                      height: "12px",
-                      backgroundColor: "#3b9c80",
-                      borderRadius: "2px",
+                      width: "8px",
+                      height: "8px",
+                      backgroundColor: "#30a14e",
+                      borderRadius: "1px",
                     }}
                   />
                   <Box
                     sx={{
-                      width: "12px",
-                      height: "12px",
-                      backgroundColor: "#15695c",
-                      borderRadius: "2px",
+                      width: "8px",
+                      height: "8px",
+                      backgroundColor: "#216e39",
+                      borderRadius: "1px",
                     }}
                   />
                   <span>More</span>
                 </Box>
               </Box>
-            </animated.div>
-          </animated.div>
-        </animated.div>
-        <animated.div style={chartSpring2}>
-          <Chart
-            options={difficultyChartOptions}
-            series={difficultyChartSeries}
-            type="donut"
-            width="100%"
-            height="290"
-          />
-        </animated.div>
-        <animated.div style={chartSpring3}>
-          <Chart
-            options={successChartOptions}
-            series={successChartSeries}
-            type="donut"
-            width="100%"
-            height="290"
-          />
-        </animated.div>
-      </Box>
-    </animated.div>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Progress Overview Section */}
+      <Card sx={{ mb: 2 }}>
+        <CardContent>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
+            Progress Overview
+          </Typography>
+          {totalProblems > 0 ? (
+            <Grid container spacing={3}>
+              {difficultyData.map((item) => (
+                <Grid item xs={12} md={4} key={item.name}>
+                  <Box sx={{ mb: 2 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {item.name}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: theme.palette.text.main }}
+                      >
+                        {item.value} problems
+                      </Typography>
+                    </Box>
+                    <LinearProgress
+                      variant="determinate"
+                      value={(item.value / totalProblems) * 100 || 0}
+                      sx={{
+                        height: 8,
+                        borderRadius: 4,
+                        backgroundColor: `${item.color}20`,
+                        "& .MuiLinearProgress-bar": {
+                          backgroundColor: item.color,
+                          borderRadius: 4,
+                        },
+                      }}
+                    />
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Box sx={{ mt: 2, textAlign: "center" }}>
+              <Typography variant="body2" color="text.secondary">
+                No problems solved yet. Your progress will appear here once you
+                start solving problems.
+              </Typography>
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+    </Box>
   );
 };
 

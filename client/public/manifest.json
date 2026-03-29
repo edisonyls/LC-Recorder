@@ -1,6 +1,6 @@
 {
-  "short_name": "YLSLC",
-  "name": "LeetCode Recorder",
+  "short_name": "LC-Recorder",
+  "name": "LC-Recorder",
   "icons": [
     {
       "src": "logo.ico",
@@ -8,14 +8,9 @@
       "type": "image/x-icon"
     },
     {
-      "src": "logo192.png",
+      "src": "logo.png",
       "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "any"
     }
   ],
   "start_url": ".",

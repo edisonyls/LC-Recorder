@@ -3,8 +3,7 @@ import { Link } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import FlutterDashIcon from "@mui/icons-material/FlutterDash";
-import { grey } from "@mui/material/colors";
+import CodeIcon from "@mui/icons-material/Code";
 import {
   Box,
   useMediaQuery,
@@ -14,9 +13,10 @@ import {
   ListItem,
   ListItemText,
   useTheme,
+  Button,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { BlackBackgroundButton } from "../generic/GenericButton";
+import CloseIcon from "@mui/icons-material/Close";
 
 const HomeNavbar = () => {
   const theme = useTheme();
@@ -29,39 +29,114 @@ const HomeNavbar = () => {
 
   const list = () => (
     <Box
-      sx={{ width: 150 }}
+      sx={{
+        width: 250,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
       role="presentation"
       onClick={toggleDrawer(false)}
       onKeyDown={toggleDrawer(false)}
     >
-      <List>
-        <ListItem component={Link} to="/signin">
-          <ListItemText primary="Sign In" sx={{ color: "#fff" }} />
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          p: 2,
+          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+        }}
+      >
+        <IconButton
+          onClick={toggleDrawer(false)}
+          sx={{ color: theme.palette.text.primary }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      <List sx={{ flex: 1, pt: 3 }}>
+        <ListItem
+          component={Link}
+          to="/signin"
+          sx={{
+            mb: 2,
+            mx: 2,
+            borderRadius: 1,
+            "&:hover": {
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
+            },
+          }}
+        >
+          <ListItemText
+            primary="Sign In"
+            sx={{
+              "& .MuiListItemText-primary": {
+                fontWeight: 500,
+                fontSize: "1rem",
+              },
+            }}
+          />
         </ListItem>
-        <ListItem component={Link} to="/register" sx={{ color: "#fff" }}>
-          <ListItemText primary="Register" />
+        <ListItem
+          component={Link}
+          to="/register"
+          sx={{
+            mx: 2,
+            borderRadius: 1,
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            "&:hover": {
+              backgroundColor: theme.palette.primary.dark,
+            },
+          }}
+        >
+          <ListItemText
+            primary="Get Started"
+            sx={{
+              "& .MuiListItemText-primary": {
+                fontWeight: 600,
+                fontSize: "1rem",
+                textAlign: "center",
+              },
+            }}
+          />
         </ListItem>
       </List>
     </Box>
   );
 
   return (
-    <AppBar position="static" sx={{ background: "black" }}>
-      <Toolbar>
-        <FlutterDashIcon />
-        <Typography
-          variant="h6"
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        backgroundColor: "black",
+        borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+      }}
+    >
+      <Toolbar sx={{ py: 1 }}>
+        <Box
           component={Link}
           to="/"
           sx={{
-            flexGrow: 1,
-            ml: 2,
+            display: "flex",
+            alignItems: "center",
             textDecoration: "none",
             color: "inherit",
+            flexGrow: 1,
           }}
         >
-          YLSLC
-        </Typography>
+          <Box
+            component="img"
+            src="/full-logo.png"
+            alt="LC-Recorder"
+            sx={{
+              height: 50,
+              width: "auto",
+              cursor: "pointer",
+            }}
+          />
+        </Box>
 
         {isMobile ? (
           <>
@@ -69,6 +144,12 @@ const HomeNavbar = () => {
               color="inherit"
               aria-label="menu"
               onClick={toggleDrawer(true)}
+              sx={{
+                color: theme.palette.text.primary,
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.08)",
+                },
+              }}
             >
               <MenuIcon />
             </IconButton>
@@ -78,7 +159,8 @@ const HomeNavbar = () => {
               onClose={toggleDrawer(false)}
               sx={{
                 "& .MuiDrawer-paper": {
-                  backgroundColor: grey[900],
+                  backgroundColor: theme.palette.background.paper,
+                  backgroundImage: "none",
                 },
               }}
             >
@@ -86,17 +168,39 @@ const HomeNavbar = () => {
             </Drawer>
           </>
         ) : (
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <BlackBackgroundButton
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+            <Button
               component={Link}
               to="/signin"
-              buttonText="Sign In"
-            />
-            <BlackBackgroundButton
+              variant="text"
+              sx={{
+                color: theme.palette.text.primary,
+                fontWeight: 500,
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.05)",
+                },
+              }}
+            >
+              Sign In
+            </Button>
+            <Button
               component={Link}
               to="/register"
-              buttonText="Register"
-            />
+              variant="contained"
+              sx={{
+                backgroundColor: theme.palette.primary.main,
+                color: theme.palette.primary.contrastText,
+                fontWeight: 600,
+                px: 3,
+                "&:hover": {
+                  backgroundColor: theme.palette.primary.dark,
+                  transform: "translateY(-1px)",
+                  boxShadow: `0 4px 12px rgba(0, 217, 255, 0.25)`,
+                },
+              }}
+            >
+              Get Started
+            </Button>
           </Box>
         )}
       </Toolbar>

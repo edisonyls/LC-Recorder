@@ -19,13 +19,12 @@ https://github.com/edisonyls/LeetCodeRecorder/assets/89026659/d7c8a35b-73f8-44a8
 - [Getting Started](###getting-started)
   - [Frontend Setup](####frontend-setup)
   - [Backend Setup](####backend-end-setup)
-  - [Github Actions Secrets](####github-actions-secrets)
 
 ### Build With
 
-- React, deployed in S3 and CloudFront
-- Spring Boot, Java, deployed in EC2
-- MySql, deployed in RDS
+- React
+- Spring Boot, Java
+- MySql
 
 ### Getting Started
 
@@ -39,26 +38,3 @@ https://github.com/edisonyls/LeetCodeRecorder/assets/89026659/d7c8a35b-73f8-44a8
 
 - This Spring Boot application runs on Java 17
 - Configure your database connection on the `application.yml` file.
-
-#### Github Actions Secret
-
-This project have enable the auto deployment seeting. You can find the corresponding yml files under the `.github/workflows` folder. The deployment process for frontend is the `react-cicd.yml`
-file and for backend is the `spring-boot-cicd.yml` file.
-|Secret|Definition|Corresponding File|
-|------|----------|------------------|
-|S3_BUCKET_NAME|This is the bucket name of your AWS S3 bucket where you host your website.|react-cicd.yml|
-|AWS_REGION|This is your AWS region.|react-cicd.yml|
-|CLOUDFRONT_DISTRIBUTION_ID|This is your AWS CloudFront distribution ID.|react-cicd.yml|
-|AWS_ACCESS_KEY_ID|Your access key to AWS for programmatical access.|react-cicd.yml|
-|AWS_SECRET_ACCESS_KEY|Your paired secret for the access key.|react-cicd.yml|
-|DOCKER_USERNAME|Your DockerHub username.|spring-boot-cicd.yml|
-|DOCKER_PASSWORD|The password to access your DockerHub.|spring-boot-cicd.yml|
-|EC2_HOST|The IPv4 address for your EC2 instance.|spring-boot-cicd.yml|
-|EC2_USER|The SSH username for your EC2 instance. It's `ubuntu` for my use.|spring-boot-cicd.yml|
-|EC2_SSH_KEY|The SSH private key for your EC2 instance access.|spring-boot-cicd.yml|
-|DATABASE_USERNAME|User name of your database in RDS.|spring-boot-cicd.yml|
-|DATABASE_PASSWORD|Password to access your database.|spring-boot-cicd.yml|
-|JWT_KEY|The JWT key token which is used for the JWT authentication for this application.|spring-boot-cicd.yml|
-
-As this application is deployed in Docker, there is a Dockerfile where you also need to assign the `DATABASE_USERNAME`, `DATABASE_PASSWORD` and `DATABASE_PASSWORD` to handle environment variables
-.

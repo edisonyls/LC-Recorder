@@ -14,8 +14,8 @@ import { UserHooks } from "../hooks/userHooks/UserHooks";
 const SignInPage = () => {
   const [formData, setFormData] = useState({});
 
-  const { state } = useUser();
-  const { loading } = state;
+  const { state, dispatch } = useUser();
+  const { loading, error } = state;
   const { login } = UserHooks();
 
   const navigate = useNavigate();
@@ -37,6 +37,13 @@ const SignInPage = () => {
       }
     }
   }, [navigate]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch({ type: "CLEAR_ERROR" });
+    }
+  }, [error, dispatch]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });

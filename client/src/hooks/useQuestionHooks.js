@@ -2,6 +2,144 @@ import { useNavigate } from "react-router-dom";
 import { axiosInstance } from "../config/axiosConfig";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
+import {
+  getDefaultTipTapContent,
+  parseTipTapContent,
+} from "../utils/tipTapContentParser";
+
+const extractExistingImageIds = (contentString) => {
+  try {
+    const content = JSON.parse(contentString);
+    const imageIds = [];
+
+    const collectImageIds = (node) => {
+      if (!node || typeof node !== "object") return;
+
+      if (Array.isArray(node)) {
+        node.forEach(collectImageIds);
+        return;
+      }
+
+      if (node.type === "image" && node.attrs?.src) {
+        const src = node.attrs.src;
+
+        if (
+          src &&
+          !src.startsWith("blob:") &&
+          !src.startsWith("http") &&
+          !src.startsWith("/api")
+        ) {
+          imageIds.push(src);
+        }
+      }
+
+      if (node.content) {
+        node.content.forEach(collectImageIds);
+      }
+    };
+
+    collectImageIds(content);
+    return imageIds;
+  } catch (error) {
+    console.error("Error extracting existing image IDs:", error);
+    return [];
+  }
+};
+
+const replaceContentBlobsWithImageIds = async (
+  contentString,
+  imageMap,
+  newImageIds,
+  existingImageIds = []
+) => {
+  try {
+    const content = JSON.parse(contentString);
+
+    const blobToImageId = new Map();
+
+    const collectBlobUrls = (node, blobUrls = []) => {
+      if (!node || typeof node !== "object") return blobUrls;
+
+      if (Array.isArray(node)) {
+        node.forEach((item) => collectBlobUrls(item, blobUrls));
+        return blobUrls;
+      }
+
+      if (node.type === "image" && node.attrs?.src) {
+        const src = node.attrs.src;
+        if (src.startsWith("blob:")) {
+          blobUrls.push(src);
+        }
+      }
+
+      if (node.content) {
+        node.content.forEach((item) => collectBlobUrls(item, blobUrls));
+      }
+
+      return blobUrls;
+    };
+
+    const blobUrls = collectBlobUrls(content);
+
+    const newBlobUrls = [];
+    const existingBlobUrls = [];
+
+    blobUrls.forEach((blobUrl) => {
+      if (imageMap.has(blobUrl)) {
+        newBlobUrls.push(blobUrl);
+      } else {
+        existingBlobUrls.push(blobUrl);
+      }
+    });
+
+    // Map new blob URLs to new image IDs
+    newBlobUrls.forEach((blobUrl, index) => {
+      if (index < newImageIds.length) {
+        blobToImageId.set(blobUrl, newImageIds[index]);
+      }
+    });
+
+    // Map existing blob URLs to existing image IDs
+    existingBlobUrls.forEach((blobUrl, index) => {
+      if (index < existingImageIds.length) {
+        blobToImageId.set(blobUrl, existingImageIds[index]);
+      }
+    });
+
+    const replaceInNode = (node) => {
+      if (!node || typeof node !== "object") return node;
+
+      if (Array.isArray(node)) {
+        return node.map(replaceInNode).filter(Boolean);
+      }
+
+      const newNode = { ...node };
+
+      // Replace blob URLs in image nodes
+      if (newNode.type === "image" && newNode.attrs?.src) {
+        const src = newNode.attrs.src;
+        if (src.startsWith("blob:")) {
+          if (blobToImageId.has(src)) {
+            const imageId = blobToImageId.get(src);
+            newNode.attrs.src = imageId;
+          }
+        }
+      }
+      if (newNode.content) {
+        newNode.content = newNode.content.map(replaceInNode).filter(Boolean); // Remove null nodes
+      }
+
+      return newNode;
+    };
+
+    const updatedContent = replaceInNode(content);
+
+    return JSON.stringify(updatedContent);
+  } catch (error) {
+    console.error("Error processing content for blob replacement:", error);
+    return contentString;
+  }
+};
 
 export const useQuestionHooks = (question, initialQuestion) => {
   const navigate = useNavigate();
@@ -14,14 +152,19 @@ export const useQuestionHooks = (question, initialQuestion) => {
     }
 
     for (let i = 0; i < question.solutions.length; i++) {
-      const file = question.solutions[i].file;
-      if (file && file.size > 5 * 1024 * 1024) {
-        toast.error(
-          `Image in Solution ${
-            i + 1
-          } exceeds 5MB. Please upload a smaller file.`
-        );
-        return;
+      const solution = question.solutions[i];
+      const files = solution.files || [];
+
+      for (let j = 0; j < files.length; j++) {
+        const file = files[j];
+        if (file && file.size > 5 * 1024 * 1024) {
+          toast.error(
+            `Image ${j + 1} in Solution ${
+              i + 1
+            } exceeds 5MB. Please upload a smaller file.`
+          );
+          return;
+        }
       }
     }
 
@@ -40,7 +183,6 @@ export const useQuestionHooks = (question, initialQuestion) => {
     const deletePromises = imagesToBeDeleted.map((imageId) => {
       return axiosInstance
         .delete(`question/image/${question.id}/${imageId}`)
-        .then((response) => console.log(`Deleted imageId: ${imageId}`))
         .catch((error) =>
           console.error(`Error deleting imageId: ${imageId}`, error)
         );
@@ -51,11 +193,17 @@ export const useQuestionHooks = (question, initialQuestion) => {
     }
 
     const uploadPromises = question.solutions.map(async (solution, index) => {
-      // only update to S3 if contains a file in solution
-      if (solution.file) {
+      const files = solution.files || [];
+      const imageIds = [];
+
+      // Upload all files for this solution
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
         const fileData = new FormData();
-        fileData.append("image", solution.file);
+        fileData.append("image", file);
         fileData.append("questionNumber", question.number);
+
         try {
           const response = await axiosInstance.post(
             "question/upload-image",
@@ -67,28 +215,42 @@ export const useQuestionHooks = (question, initialQuestion) => {
             }
           );
           if (response.data.serverMessage === "SUCCESS") {
-            return { ...solution, imageId: response.data.data };
-          } else {
-            console.log("Image upload failed for solution", index);
-            return solution;
+            const imageId = response.data.data;
+            imageIds.push(imageId);
           }
         } catch (error) {
           console.error(
-            "An error occurred during submission for solution",
+            `An error occurred during image upload ${i + 1} for solution`,
             index,
             error
           );
-          return solution;
         }
-      } else {
-        return solution;
       }
+
+      const originalSolution = initialQuestion?.solutions?.[index];
+      const existingImageIds = originalSolution
+        ? extractExistingImageIds(originalSolution)
+        : [];
+
+      const updatedContent = await replaceContentBlobsWithImageIds(
+        solution.content,
+        solution.imageMap || new Map(),
+        imageIds,
+        existingImageIds
+      );
+
+      return {
+        ...solution,
+        imageIds,
+        uploadedCount: imageIds.length,
+        content: updatedContent,
+      };
     });
     try {
       // Wait for all the image upload promises to complete
       const updatedSolutions = await Promise.all(uploadPromises);
-      question.solutions = updatedSolutions;
-      const submitResult = await submitRestData(question.id);
+
+      const submitResult = await submitRestData(question.id, updatedSolutions);
       if (submitResult) {
         navigate(-1);
         toast.success("Question updated successfully!");
@@ -102,10 +264,17 @@ export const useQuestionHooks = (question, initialQuestion) => {
 
   const uploadFiles = async (solutions, questionNumber) => {
     const uploadPromises = solutions.map(async (solution, index) => {
-      if (solution.file) {
+      const files = solution.files || [];
+      const imageIds = [];
+
+      // Upload all files for this solution
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
         const fileData = new FormData();
-        fileData.append("image", solution.file);
+        fileData.append("image", file);
         fileData.append("questionNumber", questionNumber);
+
         try {
           const response = await axiosInstance.post(
             "question/upload-image",
@@ -117,22 +286,37 @@ export const useQuestionHooks = (question, initialQuestion) => {
             }
           );
           if (response.data.serverMessage === "SUCCESS") {
-            return { ...solution, imageId: response.data.data };
-          } else {
-            console.log("Image upload failed for solution", index);
-            return solution;
+            const imageId = response.data.data;
+            imageIds.push(imageId);
           }
         } catch (error) {
           console.error(
-            "An error occurred during submission for solution",
+            `An error occurred during image upload ${i + 1} for solution`,
             index,
             error
           );
-          return solution;
         }
-      } else {
-        return solution; // Return the original solution if there's no file to upload
       }
+
+      // Extract existing image IDs from the original solution content
+      const originalSolution = initialQuestion?.solutions?.[index];
+      const existingImageIds = originalSolution
+        ? extractExistingImageIds(originalSolution)
+        : [];
+
+      const updatedContent = await replaceContentBlobsWithImageIds(
+        solution.content,
+        solution.imageMap || new Map(),
+        imageIds,
+        existingImageIds
+      );
+
+      return {
+        ...solution,
+        imageIds,
+        uploadedCount: imageIds.length,
+        content: updatedContent,
+      };
     });
 
     return await Promise.all(uploadPromises);
@@ -149,14 +333,19 @@ export const useQuestionHooks = (question, initialQuestion) => {
         }
 
         for (let i = 0; i < question.solutions.length; i++) {
-          const file = question.solutions[i].file;
-          if (file && file.size > 5 * 1024 * 1024) {
-            toast.error(
-              `Image in Solution ${
-                i + 1
-              } exceeds 5MB. Please upload a smaller file.`
-            );
-            throw new Error("Image file too large");
+          const solution = question.solutions[i];
+          const files = solution.files || [];
+
+          for (let j = 0; j < files.length; j++) {
+            const file = files[j];
+            if (file && file.size > 5 * 1024 * 1024) {
+              toast.error(
+                `Image ${j + 1} in Solution ${
+                  i + 1
+                } exceeds 5MB. Please upload a smaller file.`
+              );
+              throw new Error("Image file too large");
+            }
           }
         }
 
@@ -165,9 +354,11 @@ export const useQuestionHooks = (question, initialQuestion) => {
             question.solutions,
             question.number
           );
-          question.solutions = updatedSolutions;
-          console.log(question);
-          const submitResult = await submitRestData(question.id);
+
+          const submitResult = await submitRestData(
+            question.id,
+            updatedSolutions
+          );
           if (submitResult) {
             navigate("/table");
           } else {
@@ -202,18 +393,20 @@ export const useQuestionHooks = (question, initialQuestion) => {
     return true;
   };
 
-  const submitRestData = async (id) => {
+  const submitRestData = async (id, processedSolutions = null) => {
+    const solutionsToUse = processedSolutions || question.solutions;
     const formattedData = {
       ...question,
       dateOfCompletion: question.dateOfCompletion
         ? question.dateOfCompletion.format("YYYY-MM-DD")
         : "",
       timeOfCompletion: formatTime(question.timeOfCompletion),
-      solutions: question.solutions.map((solution) => ({
-        thinkingProcess: solution.thinkingProcess,
-        codeSnippet: solution.codeSnippet,
-        imageId: solution.imageId,
-      })),
+      solutions: solutionsToUse.map((solution) => {
+        const parsedContent = parseTipTapContent(solution?.content);
+        return parsedContent
+          ? JSON.stringify(parsedContent)
+          : JSON.stringify(getDefaultTipTapContent());
+      }),
     };
     if (formattedData.success === true) {
       formattedData.reasonOfFail = "";
@@ -226,10 +419,8 @@ export const useQuestionHooks = (question, initialQuestion) => {
         response = await axiosInstance.post("question", formattedData);
       }
       if (response && response.data.serverMessage === "SUCCESS") {
-        console.log("Form submission successful", response.data.data);
         return true;
       } else {
-        console.log(response.data);
         return false;
       }
     } catch (error) {

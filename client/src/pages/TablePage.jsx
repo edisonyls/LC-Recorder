@@ -18,6 +18,7 @@ import QuestionsTable from "../components/QuestionsTable";
 import { GenericDialog } from "../components/generic/GenericDialog";
 import GenericSearchBox from "../components/generic/GenericSearchBox";
 import { toast } from "react-toastify";
+import { UserHooks } from "../hooks/userHooks/UserHooks";
 
 const TablePage = () => {
   const [questions, setQuestions] = useState([]);
@@ -34,6 +35,7 @@ const TablePage = () => {
   const [totalQuestions, setTotalQuestions] = useState(0); // State for total number of questions
 
   const navigate = useNavigate();
+  const { getCurrentUser } = UserHooks();
 
   const handleToggleStar = async (id, event) => {
     event.preventDefault();
@@ -117,6 +119,10 @@ const TablePage = () => {
       setIsFetching(false);
     }
   };
+
+  useEffect(() => {
+    getCurrentUser();
+  }, []); // eslint-disable-line
 
   useEffect(() => {
     fetchData(page, pageSize, sortOption, searchQuery);

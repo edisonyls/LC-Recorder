@@ -1,0 +1,60 @@
+name: Deploy Spring Boot App
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "ylslc/**"
+      - ".github/workflows/server-deploy.yml"
+
+jobs:
+  deploy-prod:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Stop service
+        run: |
+          sudo systemctl stop lc-recorder
+
+      - name: Build Spring Boot Application
+        run: |
+          cd "$GITHUB_WORKSPACE/ylslc"
+          ./mvnw clean package -DskipTests
+
+      - name: Deploy to production server
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+
+        run: |
+          # Create deployment directory if it doesn't exist
+          mkdir -p "$DEPLOY_PATH"
+
+          # Clean deployment directory
+          echo "Cleaning deployment directory..."
+          rm -rf "$DEPLOY_PATH"/*
+
+          # Copy JAR file to deployment directory
+          echo "Copying application JAR..."
+          cp "$GITHUB_WORKSPACE/ylslc/target/ylslc-0.0.1-SNAPSHOT.jar" "$DEPLOY_PATH/app.jar"
+
+          # Create environment file for systemd service
+          echo "Creating environment configuration..."
+          cat > "$DEPLOY_PATH/.env" << EOF
+          DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+          DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+          DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          UPGRADE_SECRET_KEY=${{ secrets.UPGRADE_SECRET_KEY }}
+          MYSQL_HOST=${{ secrets.MYSQL_HOST }}
+          EOF
+
+          echo "Deployment completed successfully!"
+
+      - name: Start service
+        run: |
+          sudo systemctl start lc-recorder
+          sudo systemctl status lc-recorder --no-pager

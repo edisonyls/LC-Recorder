@@ -1,23 +1,25 @@
 import { axiosInstance } from "../config/axiosConfig";
-import { useDataStructure } from "../context/dataStructureContext";
-import { actionTypes } from "../reducer/dataStructureActions";
+import { useNotebook } from "../context/notebookContext";
+import { actionTypes } from "../reducer/notebookActions";
 
 export const NodeHooks = () => {
-  const { dispatch } = useDataStructure();
+  const { dispatch } = useNotebook();
 
-  const addNode = async (selectedStructureId, name) => {
+  const addNode = async (notebookId, name, parentNodeId = null) => {
     dispatch({ type: actionTypes.PROCESS_START });
     try {
-      const response = await axiosInstance.post(`node/${selectedStructureId}`, {
+      const url = parentNodeId
+        ? `notebook/${notebookId}/node?parentNodeId=${parentNodeId}`
+        : `notebook/${notebookId}/node`;
+
+      const response = await axiosInstance.post(url, {
         name,
-        contents: [],
+        content: "",
       });
+
       dispatch({
-        type: actionTypes.ADD_NODE,
-        payload: {
-          dataStructureId: selectedStructureId,
-          node: response.data.data,
-        },
+        type: actionTypes.UPDATE_NOTEBOOK_SUCCESS,
+        payload: response.data.data,
       });
     } catch (error) {
       dispatch({
@@ -28,38 +30,38 @@ export const NodeHooks = () => {
     }
   };
 
-  const renameNode = async (dataStructureId, nodeId, newName) => {
+  const updateNode = async (notebookId, nodeId, name, content) => {
     dispatch({ type: actionTypes.PROCESS_START });
     try {
-      const response = await axiosInstance.patch(`node/${nodeId}`, {
-        name: newName,
-      });
+      const response = await axiosInstance.put(
+        `notebook/${notebookId}/node/${nodeId}`,
+        {
+          name,
+          content,
+        }
+      );
       dispatch({
-        type: actionTypes.RENAME_NODE,
-        payload: {
-          dataStructureId,
-          node: response.data.data,
-        },
+        type: actionTypes.UPDATE_NOTEBOOK_SUCCESS,
+        payload: response.data.data,
       });
     } catch (error) {
       dispatch({
         type: actionTypes.PROCESS_FAILURE,
         error: error,
       });
-      console.error("Failed to rename the node: ", error);
+      console.error("Failed to update the node: ", error);
     }
   };
 
-  const deleteNode = async (dataStructureId, nodeId) => {
+  const deleteNode = async (notebookId, nodeId) => {
     dispatch({ type: actionTypes.PROCESS_START });
     try {
-      const response = await axiosInstance.delete(`node/${nodeId}`);
+      const response = await axiosInstance.delete(
+        `notebook/${notebookId}/node/${nodeId}`
+      );
       dispatch({
-        type: actionTypes.DELETE_NODE,
-        payload: {
-          dataStructureId,
-          node: response.data.data,
-        },
+        type: actionTypes.UPDATE_NOTEBOOK_SUCCESS,
+        payload: response.data.data,
       });
     } catch (error) {
       dispatch({
@@ -70,5 +72,57 @@ export const NodeHooks = () => {
     }
   };
 
-  return { addNode, renameNode, deleteNode };
+  const getNode = async (notebookId, nodeId) => {
+    try {
+      const response = await axiosInstance.get(
+        `notebook/${notebookId}/node/${nodeId}`
+      );
+      return response.data.data;
+    } catch (error) {
+      console.error("Failed to get the node: ", error);
+      return null;
+    }
+  };
+
+  const uploadNodeImage = async (notebookId, nodeId, imageFile) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", imageFile);
+
+      const response = await axiosInstance.post(
+        `notebook/${notebookId}/node/${nodeId}/upload-image`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return response.data.data; // Returns the imageId
+    } catch (error) {
+      console.error("Failed to upload image: ", error);
+      throw error;
+    }
+  };
+
+  const deleteNodeImage = async (notebookId, nodeId, imageId) => {
+    try {
+      const response = await axiosInstance.delete(
+        `notebook/${notebookId}/node/${nodeId}/image/${imageId}`
+      );
+      return response.data.data;
+    } catch (error) {
+      console.error("Failed to delete image: ", error);
+      throw error;
+    }
+  };
+
+  return {
+    addNode,
+    updateNode,
+    deleteNode,
+    getNode,
+    uploadNodeImage,
+    deleteNodeImage,
+  };
 };

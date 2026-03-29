@@ -10,10 +10,12 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import InfoIcon from "@mui/icons-material/Info";
+import {
+  Info as InfoIcon,
+  ArrowDropDown as ArrowDropDownIcon,
+} from "@mui/icons-material";
 import { grey } from "@mui/material/colors";
 import GenericTextField from "./generic/GenricTextField";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import UserBadge from "./UserBadge";
 import { SmallNarrowButton } from "./generic/GenericButton";
 
@@ -54,7 +56,7 @@ export const ProfileView = ({ user }) => {
           <Typography variant="h4" sx={{ fontWeight: "medium" }}>
             {user.firstName} {user.lastName}
           </Typography>
-          <UserBadge tier={user.role} />
+          <UserBadge role={user.role} />
         </Box>
         <Typography
           variant="subtitle2"

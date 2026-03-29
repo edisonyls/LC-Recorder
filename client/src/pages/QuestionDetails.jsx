@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { axiosInstance } from "../config/axiosConfig";
 import AuthenticatedNavbar from "../components/navbar/AuthenticatedNavbar";
-import CodeSnippet from "../components/CodeSnippet";
+
+import TipTapViewer from "../components/TipTapViewer";
 import {
   Container,
   Card,
@@ -14,9 +15,7 @@ import {
   Avatar,
   Box,
   Paper,
-  Modal,
-  IconButton,
-  Divider,
+  Stack,
 } from "@mui/material";
 import {
   Assignment,
@@ -25,24 +24,27 @@ import {
   Timer,
   QueryStats,
   ArrowBack,
-  Close,
   Terrain,
+  Code,
 } from "@mui/icons-material";
 import SyncIcon from "@mui/icons-material/Sync";
 import { WhiteBackgroundButton } from "../components/generic/GenericButton";
 import GenericSpinner from "../components/generic/GenericSpinner";
 import Footer from "../components/Footer";
 import RandomQuote from "../components/RandomQuote";
+import { UserHooks } from "../hooks/userHooks/UserHooks";
 
 const QuestionDetails = () => {
   const [question, setQuestion] = useState();
   const [loading, setLoading] = useState(false);
-  const [images, setImages] = useState({});
-  const [open, setOpen] = useState(false);
-  const [currentImage, setCurrentImage] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = location.state || {};
+  const { getCurrentUser } = UserHooks();
+
+  useEffect(() => {
+    getCurrentUser();
+  }, []); // eslint-disable-line
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,38 +53,11 @@ const QuestionDetails = () => {
         .get("question/" + id)
         .then((response) => {
           setQuestion(response.data.data);
-          if (response.data.data.solutions !== null) {
-            fetchImage(response.data.data);
-          }
         })
         .catch((error) => {
-          console.log("Failed to fetch data: ", error);
+          console.error("Failed to fetch data: ", error);
         });
       setLoading(false);
-    };
-
-    const fetchImage = async (question) => {
-      const newImages = {};
-      for (const solution of question.solutions) {
-        if (solution.imageId === null || solution.imageId === "") {
-          continue;
-        }
-        try {
-          const response = await axiosInstance.get(
-            `question/image/${question.id}/${solution.imageId}`,
-            {
-              responseType: "blob",
-            }
-          );
-          const imageBlob = response.data;
-          const imageObjectURL = URL.createObjectURL(imageBlob);
-
-          newImages[solution.imageId] = imageObjectURL;
-        } catch (error) {
-          console.error("Failed to fetch image", error);
-        }
-      }
-      setImages(newImages);
     };
 
     fetchData();
@@ -92,13 +67,17 @@ const QuestionDetails = () => {
     navigate("/new", { state: { question: question } });
   };
 
-  const handleOpen = (imgSrc) => {
-    setCurrentImage(imgSrc);
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
+  const getDifficultyColor = (difficulty) => {
+    switch (difficulty) {
+      case "Easy":
+        return "#4CAF50";
+      case "Medium":
+        return "#FF9800";
+      case "Hard":
+        return "#F44336";
+      default:
+        return "#6B7280";
+    }
   };
 
   if (!question || loading) {
@@ -113,20 +92,19 @@ const QuestionDetails = () => {
   return (
     <>
       <AuthenticatedNavbar />
-      <Container sx={{ padding: 2, minHeight: "81vh", marginBottom: 6 }}>
+      <Container maxWidth="lg" sx={{ py: 4, minHeight: "81vh" }}>
+        {/* Navigation Bar */}
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            marginLeft: 2,
-            marginRight: 2,
+            alignItems: "center",
+            mb: 3,
           }}
         >
           <WhiteBackgroundButton
             icon={<ArrowBack />}
-            onClick={() => {
-              navigate(-1);
-            }}
+            onClick={() => navigate(-1)}
             buttonText="Back"
           />
           <WhiteBackgroundButton
@@ -135,241 +113,255 @@ const QuestionDetails = () => {
             buttonText="Modify"
           />
         </Box>
-        <Card
-          elevation={3}
-          sx={{ mt: 2, overflow: "visible", paddingBottom: 4, padding: 4 }}
-        >
+
+        {/* Main Question Card */}
+        <Card elevation={3} sx={{ mb: 4 }}>
           <CardHeader
             avatar={
-              <Avatar>
+              <Avatar sx={{ bgcolor: "primary.main", color: "black" }}>
                 <Assignment />
               </Avatar>
             }
             title={
-              <Typography variant="h5">{`${question.number}. ${question.title}`}</Typography>
+              <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
+                {question.number}. {question.title}
+              </Typography>
             }
-            subheader={question.dateOfCompletion}
+            subheader={
+              <Typography
+                variant="subtitle1"
+                color="text.secondary"
+                sx={{ mt: 1 }}
+              >
+                Completed on {question.dateOfCompletion}
+              </Typography>
+            }
             action={
               <Chip
-                label={question.success ? "Solved" : "Not Quite"}
+                label={question.success ? " Solved" : " Not Quite"}
                 color={question.success ? "success" : "error"}
                 icon={question.success ? <CheckCircle /> : <Error />}
-                variant="outlined"
+                variant={question.success ? "filled" : "outlined"}
+                size="large"
+                sx={{
+                  fontSize: "0.875rem",
+                  fontWeight: 700,
+                  px: 2,
+                  py: 0.5,
+                  borderWidth: 2,
+                  backgroundColor: question.success ? "#059669" : "transparent",
+                  borderColor: question.success ? "#059669" : "#DC2626",
+                  color: question.success ? "white" : "#DC2626",
+                  "&:hover": {
+                    backgroundColor: question.success
+                      ? "#047857"
+                      : "rgba(220, 38, 38, 0.1)",
+                    transform: "scale(1.05)",
+                  },
+                  transition: "all 0.3s ease",
+                  boxShadow: question.success
+                    ? "0 4px 12px rgba(5, 150, 105, 0.3)"
+                    : "0 4px 12px rgba(220, 38, 38, 0.2)",
+                }}
               />
             }
+            sx={{ pb: 2 }}
           />
-          <CardContent>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Typography variant="body1" component="div" gutterBottom>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <QueryStats sx={{ mr: 1 }} />
+
+          <CardContent sx={{ pt: 0 }}>
+            {/* Question Stats Grid */}
+            <Grid container spacing={3} sx={{ mb: 3 }}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    textAlign: "center",
+                    backgroundColor: "background.elevated",
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <QueryStats
+                    sx={{ fontSize: 32, mb: 1, color: "primary.main" }}
+                  />
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                  >
                     Difficulty
-                    <Chip
-                      label={question.difficulty}
-                      sx={{
-                        backgroundColor:
-                          question.difficulty === "Easy"
-                            ? "#4CAF50"
-                            : question.difficulty === "Medium"
-                            ? "#FF9800"
-                            : "#F44336",
-                        color: "white",
-                        marginLeft: 2,
-                      }}
-                    />
-                  </Box>
-                </Typography>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Typography variant="body1" component="div" gutterBottom>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Timer sx={{ mr: 1 }} /> Time of Completion:{" "}
-                    <Typography sx={{ marginLeft: 1 }}>
-                      {question.timeOfCompletion}
-                    </Typography>
-                  </Box>
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant="body1" component="div">
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Assignment sx={{ mr: 1 }} /> Attempts:{" "}
-                    <Typography sx={{ marginLeft: 1 }}>
-                      {question.attempts}
-                    </Typography>
-                  </Box>
-                </Typography>
-              </Grid>
-
-              {question.reasonOfFail !== "" && (
-                <Grid item xs={12}>
-                  <Typography variant="body1" component="div">
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Terrain sx={{ mr: 1 }} /> Obstacles:
-                    </Box>
-                    <Box
-                      sx={{
-                        borderLeft: 2,
-                        borderColor: "primary.main",
-                        paddingLeft: 2,
-                        marginLeft: 3,
-                        borderWidth: 4,
-                        marginTop: 2,
-                      }}
-                    >
-                      <Typography
-                        sx={{ marginLeft: 1, whiteSpace: "pre-wrap" }}
-                      >
-                        {question.reasonOfFail}
-                      </Typography>
-                    </Box>
                   </Typography>
-                </Grid>
-              )}
+                  <Chip
+                    label={question.difficulty}
+                    sx={{
+                      backgroundColor: getDifficultyColor(question.difficulty),
+                      color: "white",
+                      fontWeight: 600,
+                    }}
+                  />
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    textAlign: "center",
+                    backgroundColor: "background.elevated",
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Timer sx={{ fontSize: 32, mb: 1, color: "primary.main" }} />
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                  >
+                    Time Taken
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {question.timeOfCompletion}
+                  </Typography>
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    textAlign: "center",
+                    backgroundColor: "background.elevated",
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Assignment
+                    sx={{ fontSize: 32, mb: 1, color: "primary.main" }}
+                  />
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                  >
+                    Attempts
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {question.attempts}
+                  </Typography>
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    textAlign: "center",
+                    backgroundColor: "background.elevated",
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Code sx={{ fontSize: 32, mb: 1, color: "primary.main" }} />
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                  >
+                    Solutions
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {question.solutions?.length || 0}
+                  </Typography>
+                </Paper>
+              </Grid>
             </Grid>
-          </CardContent>
 
-          <Divider
-            textAlign="center"
-            sx={{
-              marginTop: 2,
-              marginBottom: 2,
-              background: "black",
-            }}
-          />
-          <Box sx={{ padding: 2 }}>
-            {question.solutions.map((solution, index) => (
-              <Box sx={{ mb: 2, ml: 2, mr: 2 }} key={index}>
-                <Typography variant="h4" sx={{ fontSize: "28px" }}>
-                  Solution {index + 1}
-                </Typography>
-
-                {solution.thinkingProcess !== "" && (
-                  <Box sx={{ marginBottom: 1, marginTop: 1 }}>
-                    <Typography
-                      sx={{
-                        color: "#B9BBB6",
-                        fontSize: "20px",
-                      }}
-                    >
-                      Thinking Process:
-                    </Typography>
-                    <Box
-                      sx={{
-                        borderLeft: 2,
-                        borderColor: "primary.main",
-                        paddingLeft: 2,
-                        marginLeft: 1,
-                        borderWidth: 4,
-                      }}
-                    >
-                      <Typography
-                        sx={{ mb: 1, whiteSpace: "pre-wrap", fontSize: "15px" }}
-                      >
-                        {solution.thinkingProcess}
-                      </Typography>
-                    </Box>
-                  </Box>
-                )}
-
-                {solution.codeSnippet && (
-                  <Box sx={{ marginBottom: 1, marginTop: 1 }}>
-                    <Typography
-                      sx={{ mb: -1, color: "#B9BBB6", fontSize: "20px" }}
-                    >
-                      Code Snippet
-                    </Typography>
-                    <CodeSnippet code={solution.codeSnippet} />
-                  </Box>
-                )}
-
-                {solution.imageId && (
-                  <Box onClick={() => handleOpen(images[solution.imageId])}>
-                    <Typography
-                      sx={{ mb: -1, color: "#B9BBB6", fontSize: "20px" }}
-                    >
-                      Uploaded Image
-                    </Typography>
-                    <Paper
-                      elevation={0}
-                      sx={{
-                        mt: 2,
-                        width: "96%",
-                        padding: 2,
-                        minHeight: "300px",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <img
-                        src={images[solution.imageId]}
-                        alt="Preview"
-                        style={{
-                          width: "50%",
-                          maxHeight: "300px",
-                          objectFit: "contain",
-                          cursor: "zoom-in",
-                        }}
-                      />
-                    </Paper>
-                  </Box>
-                )}
-              </Box>
-            ))}
-          </Box>
-          <Modal
-            open={open}
-            onClose={handleClose}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
-          >
-            <Box
-              sx={{
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                bgcolor: "background.paper",
-                boxShadow: 24,
-                p: 4,
-                width: "70vw",
-                height: "70vh",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                overflow: "hidden",
-                position: "relative",
-              }}
-            >
-              <IconButton
-                onClick={handleClose}
+            {/* Obstacles Section */}
+            {question.reasonOfFail && question.reasonOfFail.trim() !== "" && (
+              <Paper
+                elevation={0}
                 sx={{
-                  position: "absolute",
-                  top: 20,
-                  left: 20,
-                  color: "black",
+                  p: 3,
+                  mb: 3,
+                  backgroundColor: "background.elevated",
+                  border: "1px solid",
+                  borderColor: "divider",
                 }}
-                aria-label="close"
               >
-                <Close sx={{ fontSize: "2rem" }} />
-              </IconButton>
-              <img
-                src={currentImage}
-                alt="Enlarged preview"
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "100%",
-                  objectFit: "contain",
-                }}
-              />
-            </Box>
-          </Modal>
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <Terrain sx={{ mr: 2, color: "warning.main" }} />
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Obstacles Encountered
+                  </Typography>
+                </Box>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    whiteSpace: "pre-wrap",
+                    lineHeight: 1.6,
+                    pl: 2,
+                    borderLeft: "3px solid",
+                    borderColor: "warning.main",
+                  }}
+                >
+                  {question.reasonOfFail}
+                </Typography>
+              </Paper>
+            )}
+          </CardContent>
         </Card>
+
+        {/* Solutions Section */}
+        {question.solutions && question.solutions.length > 0 && (
+          <Box>
+            <Typography
+              variant="h5"
+              sx={{ mb: 3, fontWeight: 600, color: "text.primary" }}
+            >
+              {question.solutions.length} Solution(s)
+            </Typography>
+
+            <Stack spacing={4}>
+              {question.solutions.map((solution, index) => (
+                <Card key={index} elevation={2}>
+                  <CardHeader
+                    avatar={
+                      <Avatar
+                        sx={{ bgcolor: "secondary.main", color: "white" }}
+                      >
+                        {index + 1}
+                      </Avatar>
+                    }
+                    title={
+                      <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                        Solution {index + 1}
+                      </Typography>
+                    }
+                  />
+
+                  <CardContent sx={{ pt: 0 }}>
+                    <Box sx={{ "& > div": { mb: 0 } }}>
+                      <TipTapViewer
+                        content={solution}
+                        questionId={question.id}
+                      />
+                    </Box>
+                  </CardContent>
+                </Card>
+              ))}
+            </Stack>
+          </Box>
+        )}
       </Container>
-      <RandomQuote />
+
+      <Box sx={{ mt: 6 }}>
+        <RandomQuote />
+      </Box>
       <Footer />
     </>
   );

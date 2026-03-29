@@ -1,6 +1,5 @@
 package com.yls.ylslc.question;
 
-import com.yls.ylslc.question.solution.SolutionEntity;
 import com.yls.ylslc.user.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,8 +24,12 @@ public class QuestionEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<SolutionEntity> solutions = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "question_solutions", 
+        joinColumns = @JoinColumn(name = "question_id"))
+    @Column(name = "content", columnDefinition = "TEXT")
+    @OrderColumn(name = "solution_order")
+    private List<String> solutions = new ArrayList<>();
 
     private Integer number;
     private String title;
@@ -45,14 +48,20 @@ public class QuestionEntity {
         createdAt = LocalDateTime.now();
     }
 
-    public void addSolution(SolutionEntity solution) {
-        solutions.add(solution);
-        solution.setQuestion(this);
+    public void addSolution(String solutionContent) {
+        solutions.add(solutionContent);
     }
 
-    public void removeSolution(SolutionEntity solution) {
-        solutions.remove(solution);
-        solution.setQuestion(null);
+    public void removeSolution(int index) {
+        if (index >= 0 && index < solutions.size()) {
+            solutions.remove(index);
+        }
+    }
+
+    public void updateSolution(int index, String solutionContent) {
+        if (index >= 0 && index < solutions.size()) {
+            solutions.set(index, solutionContent);
+        }
     }
 
     public QuestionEntity() {

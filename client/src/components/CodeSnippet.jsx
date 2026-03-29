@@ -9,10 +9,10 @@ const CodeSnippet = ({ code }) => {
         display: "block",
         padding: "12px",
         overflowX: "auto",
-        backgroundColor: "#f5f5f5",
+        backgroundColor: "#111111",
         borderRadius: "4px",
-        border: "1px solid #ddd",
-        color: "#333",
+        border: "1px solid #333333",
+        color: "#FFFFFF",
         fontSize: "0.875rem",
         whiteSpace: "pre-wrap",
         wordBreak: "break-all",
@@ -24,6 +24,7 @@ const CodeSnippet = ({ code }) => {
         sx={{
           wordBreak: "break-all",
           fontFamily: '"JetBrains Mono", monospace',
+          color: "#FFFFFF",
         }}
       >
         {code}

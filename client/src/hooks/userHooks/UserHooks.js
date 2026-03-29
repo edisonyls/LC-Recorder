@@ -22,7 +22,7 @@ export const UserHooks = () => {
         type: userActionTypes.PROCESS_FAILURE,
         error: error.message || "Failed to fetch current user",
       });
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -53,7 +53,6 @@ export const UserHooks = () => {
         type: userActionTypes.SIGN_IN,
         payload: { token, user },
       });
-      console.log(user);
       if (user.role === "REGULAR") {
         navigate("/table");
       } else {
@@ -64,7 +63,7 @@ export const UserHooks = () => {
         type: userActionTypes.PROCESS_FAILURE,
         error: error.message || "Failed to login",
       });
-      console.log("Failed to login: " + error.message);
+      console.error("Failed to login: " + error.message);
     }
   };
 
@@ -98,7 +97,7 @@ export const UserHooks = () => {
         type: userActionTypes.PROCESS_FAILURE,
         error: error.message || "Failed to register",
       });
-      console.log("Failed to register: " + error.message);
+      console.error("Failed to register: " + error.message);
     }
   };
 
@@ -121,7 +120,7 @@ export const UserHooks = () => {
         type: userActionTypes.PROCESS_FAILURE,
         error: error.message || "Failed to update user details",
       });
-      console.log("Failed to update user detail: " + error.message);
+      console.error("Failed to update user detail: " + error.message);
     }
   };
 

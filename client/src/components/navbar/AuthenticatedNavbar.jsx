@@ -1,114 +1,151 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { AppBar, Toolbar, Typography, Box, IconButton } from "@mui/material";
-import FlutterDashIcon from "@mui/icons-material/FlutterDash";
-import ListIcon from "@mui/icons-material/List";
-import OptionDrawer from "../OptionDrawer";
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+  IconButton,
+  useTheme,
+  Avatar,
+  Tooltip,
+  Badge,
+} from "@mui/material";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import MenuIcon from "@mui/icons-material/Menu";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useUser } from "../../context/userContext";
-import { UserHooks } from "../../hooks/userHooks/UserHooks";
+import OptionDrawer from "../OptionDrawer";
+import UserBadge from "../UserBadge";
 
 const AuthenticatedNavbar = () => {
-  const { state } = useUser();
-  const { user, token } = state;
-  const { getCurrentUser } = UserHooks();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { logout } = UserHooks();
-  const location = useLocation();
-
+  const { state, dispatch } = useUser();
+  const { user } = state;
   const navigate = useNavigate();
+  const location = useLocation();
+  const theme = useTheme();
 
-  useEffect(() => {
-    getCurrentUser(token).catch((error) => {
-      alert("User credential expired. Please login again.");
-      logout();
-      navigate("/");
-    });
-  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
+  const toggleDrawer = () => {
+    setIsDrawerOpen(!isDrawerOpen);
+  };
 
   const handleLogout = () => {
-    console.log("Logging out...");
-    logout();
+    localStorage.removeItem("user");
+    dispatch({ type: "LOGOUT" });
     navigate("/");
   };
 
-  const getTimeOfDayGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 6 || hour > 23) return "Please go to sleep, ";
-    if (hour < 12) return "Good Morning, ";
-    if (hour < 18) return "Good Afternoon, ";
-    return "Good Evening, ";
-  };
-
-  const toggleDrawer = (open) => (event) => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
-    setIsDrawerOpen(open);
-  };
-
   return (
-    <AppBar position="static" sx={{ background: "black", mb: 4 }}>
-      <Toolbar>
-        <Box
-          sx={{
-            display: "flex",
-            width: "50%",
-            justifyContent: "flex-start",
-            alignItems: "center",
-            marginLeft: 2,
-          }}
-        >
-          <FlutterDashIcon />
-          <Typography
-            variant="h6"
-            component={Link}
-            to="/dashboard"
+    <>
+      <AppBar
+        position="sticky"
+        elevation={0}
+        sx={{
+          backgroundColor: "black",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+          mb: 2,
+        }}
+      >
+        <Toolbar sx={{ py: 1 }}>
+          <Box
             sx={{
-              ml: 2,
-              textDecoration: "none",
-              color: "inherit",
+              display: "flex",
+              alignItems: "center",
+              flexGrow: 1,
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              if (location.pathname !== "/dashboard") {
+                navigate("/dashboard");
+              }
             }}
           >
-            YLSLC
-          </Typography>
-        </Box>
+            <Box
+              component="img"
+              src="/full-logo.png"
+              alt="LC-Recorder"
+              sx={{
+                height: 45,
+                width: "auto",
+                cursor: "pointer",
+              }}
+            />
+          </Box>
 
-        <Box
-          sx={{
-            display: "flex",
-            width: "50%",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            marginRight: 2,
-          }}
-        >
-          <Typography variant="body1" sx={{ marginRight: 2 }}>
-            {getTimeOfDayGreeting()} {user.firstName} {user.lastName}
-          </Typography>
-          <IconButton
-            color="inherit"
-            onClick={toggleDrawer(true)}
-            sx={{
-              "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.2)",
-              },
-            }}
-          >
-            <ListIcon />
-          </IconButton>
-        </Box>
-        <OptionDrawer
-          isOpen={isDrawerOpen}
-          toggleDrawer={toggleDrawer}
-          handleLogout={handleLogout}
-          currentPath={location.pathname}
-          user={user}
-        />
-      </Toolbar>
-    </AppBar>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <UserBadge role={user.role} />
+
+            <Tooltip title="Notifications">
+              <IconButton
+                sx={{
+                  color: theme.palette.text.primary,
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.08)",
+                  },
+                }}
+              >
+                <Badge badgeContent={0} color="primary">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Profile">
+              <IconButton
+                onClick={() => navigate("/profile")}
+                sx={{
+                  ml: 1,
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.08)",
+                  },
+                }}
+              >
+                <Avatar
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    backgroundColor: theme.palette.primary.main,
+                    color: theme.palette.primary.contrastText,
+                    fontWeight: 600,
+                    fontSize: "1rem",
+                  }}
+                >
+                  {user.username ? (
+                    user.username.charAt(0).toUpperCase()
+                  ) : (
+                    <AccountCircleIcon />
+                  )}
+                </Avatar>
+              </IconButton>
+            </Tooltip>
+
+            <IconButton
+              color="inherit"
+              aria-label="menu"
+              onClick={toggleDrawer}
+              sx={{
+                ml: 1,
+                color: theme.palette.text.primary,
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.08)",
+                },
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Box>
+        </Toolbar>
+      </AppBar>
+
+      <OptionDrawer
+        isOpen={isDrawerOpen}
+        toggleDrawer={toggleDrawer}
+        handleLogout={handleLogout}
+        currentPath={location.pathname}
+        user={user}
+      />
+    </>
   );
 };
 

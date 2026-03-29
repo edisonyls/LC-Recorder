@@ -15,7 +15,11 @@ const ProfilePage = () => {
   const { user } = state;
   const [editMode, setEditMode] = useState(false);
   const [editedUser, setEditedUser] = useState(null);
-  const { updateUser } = UserHooks();
+  const { updateUser, getCurrentUser } = UserHooks();
+
+  useEffect(() => {
+    getCurrentUser();
+  }, []); // eslint-disable-line
 
   useEffect(() => {
     setEditedUser(user);
@@ -64,7 +68,7 @@ const ProfilePage = () => {
           mt: -4,
         }}
       >
-        <Container component="main" maxWidth="md" sx={{ pt: 8, pb: 6 }}>
+        <Container component="main" maxWidth="md" sx={{ pt: 8, pb: 6, mb: 4 }}>
           <Card raised sx={{ backgroundColor: grey[800], color: grey[50] }}>
             <CardContent>
               <Box sx={{ display: "flex", justifyContent: "flex-end" }}>

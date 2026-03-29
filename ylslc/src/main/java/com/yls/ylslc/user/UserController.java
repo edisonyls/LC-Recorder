@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "api/user")
-@CrossOrigin(origins = { "https://ylslc.org", "http://localhost:3000" })
+@CrossOrigin(origins = { "https://ylslc.edisonyls.com", "http://localhost:3000" })
 public class UserController {
     private final UserService userService;
 

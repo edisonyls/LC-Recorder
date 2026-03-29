@@ -49,11 +49,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors().configurationSource(corsConfigurationSource())
-                .and()
-                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(req -> req
                         .requestMatchers("/api/auth/authenticate/**", "/api/auth/register/**").permitAll()
+                        .requestMatchers("/api/health/**").permitAll()
                         .requestMatchers("/admin_only/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated())
                 .userDetailsService(userDetailsService)

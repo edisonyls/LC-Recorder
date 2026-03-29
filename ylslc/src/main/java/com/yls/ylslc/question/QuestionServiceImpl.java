@@ -1,15 +1,17 @@
 package com.yls.ylslc.question;
 
-import com.yls.ylslc.question.solution.SolutionService;
+import com.yls.ylslc.mappers.Mapper;
 import com.yls.ylslc.user.UserEntity;
 import com.yls.ylslc.user.UserService;
 import jakarta.transaction.Transactional;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,32 +24,37 @@ import java.util.*;
 public class QuestionServiceImpl implements QuestionService {
     private final QuestionRepository questionRepository;
     private final UserService userService;
-    private final SolutionService solutionService;
+    private final Mapper<QuestionEntity, QuestionDto> questionMapper;
 
     public QuestionServiceImpl(QuestionRepository theQuestionRepository,
             UserService theUserService,
-            SolutionService solutionService) {
+            Mapper<QuestionEntity, QuestionDto> questionMapper) {
         this.questionRepository = theQuestionRepository;
         this.userService = theUserService;
-        this.solutionService = solutionService;
-    }
-
-    public Page<QuestionEntity> searchQuestions(String searchQuery, Pageable pageable) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<UserEntity> currentUser = userService.findOneByUsername(username);
-        return currentUser
-                .map(user -> questionRepository.searchByTitleOrNumber(user, searchQuery, pageable))
-                .orElse(Page.empty());
+        this.questionMapper = questionMapper;
     }
 
     @Override
-    public Page<QuestionEntity> getQuestionsByUser(Pageable pageable, Sort sort) {
+    @Transactional
+    public Page<QuestionDto> getQuestionDtosByUser(Pageable pageable, Sort sort) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<UserEntity> currentUser = userService.findOneByUsername(username);
-        return currentUser
+        Page<QuestionEntity> questionPage = currentUser
                 .map(user -> questionRepository.findByUser(user,
                         PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort)))
                 .orElse(Page.empty());
+        return questionPage.map(questionMapper::mapTo);
+    }
+
+    @Override
+    @Transactional
+    public Page<QuestionDto> searchQuestionDtos(String searchQuery, Pageable pageable) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<UserEntity> currentUser = userService.findOneByUsername(username);
+        Page<QuestionEntity> questionPage = currentUser
+                .map(user -> questionRepository.searchByTitleOrNumber(user, searchQuery, pageable))
+                .orElse(Page.empty());
+        return questionPage.map(questionMapper::mapTo);
     }
 
     @Override
@@ -58,8 +65,10 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public Optional<QuestionEntity> findOne(UUID id, String username) {
-        return questionRepository.findByIdAndUsername(id, username);
+    @Transactional
+    public Optional<QuestionDto> findOne(UUID id, String username) {
+        Optional<QuestionEntity> questionEntity = questionRepository.findByIdAndUsername(id, username);
+        return questionEntity.map(questionMapper::mapTo);
     }
 
     @Override
@@ -95,8 +104,8 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public QuestionEntity partialUpdate(UUID id, QuestionEntity questionEntity) {
-        return questionRepository.findById(id).map(existingQuestion -> {
+    public QuestionDto partialUpdate(UUID id, QuestionEntity questionEntity) {
+        QuestionEntity updatedEntity = questionRepository.findById(id).map(existingQuestion -> {
             Optional.ofNullable(questionEntity.getNumber()).ifPresent(existingQuestion::setNumber);
             Optional.ofNullable(questionEntity.getTitle()).ifPresent(existingQuestion::setTitle);
             Optional.ofNullable(questionEntity.getDifficulty()).ifPresent(existingQuestion::setDifficulty);
@@ -106,11 +115,36 @@ public class QuestionServiceImpl implements QuestionService {
             Optional.ofNullable(questionEntity.getTimeOfCompletion()).ifPresent(existingQuestion::setTimeOfCompletion);
             Optional.ofNullable(questionEntity.getStar()).ifPresent(existingQuestion::setStar);
             Optional.ofNullable(questionEntity.getReasonOfFail()).ifPresent(existingQuestion::setReasonOfFail);
-            solutionService.updateSolutions(existingQuestion, questionEntity.getSolutions());
+            if (questionEntity.getSolutions() != null) {
+                existingQuestion.setSolutions(new ArrayList<>(questionEntity.getSolutions()));
+            }
+            
             return questionRepository.save(existingQuestion);
         }).orElseThrow(() -> new RuntimeException("Question not found"));
+        
+        return questionMapper.mapTo(updatedEntity);
     }
 
+    @Override
+    public String uploadImages(MultipartFile image, String questionNumber) {
+        String extension = FilenameUtils.getExtension(image.getOriginalFilename());
+        String uuid = UUID.randomUUID().toString();
+        String filename = uuid + "." + extension;
+        String rawUsername = userService.getCurrentUser().getUsername();
+        String username = rawUsername.replaceAll("[^a-zA-Z0-9_-]", "_");
+
+        String baseDir = System.getProperty("user.home") + "/ylslc_images/solution_images";
+        Path uploadDir = Paths.get(baseDir, username, questionNumber);
+        try {
+            Files.createDirectories(uploadDir);
+            Path filePath = uploadDir.resolve(filename);
+            image.transferTo(filePath.toFile());
+            return filename;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to save image", e);
+        }
+    }
 
     @Override
     public byte[] getImage(Integer questionNumber, String imageId) {
@@ -139,14 +173,17 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public QuestionEntity getQuestionById(UUID id) {
-        return questionRepository.findById(id)
+    @Transactional
+    public QuestionDto getQuestionById(UUID id) {
+        QuestionEntity questionEntity = questionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Question not found with id: " + id));
+        return questionMapper.mapTo(questionEntity);
     }
 
     @Override
-    public QuestionEntity updateStar(UUID id) {
-        return questionRepository.findById(id).map(question -> {
+    @Transactional
+    public QuestionDto updateStar(UUID id) {
+        QuestionEntity updatedEntity = questionRepository.findById(id).map(question -> {
             Boolean currentStar = question.getStar();
             if (currentStar == null) {
                 question.setStar(true);
@@ -155,6 +192,15 @@ public class QuestionServiceImpl implements QuestionService {
             }
             return questionRepository.save(question);
         }).orElseThrow(() -> new RuntimeException("Question not found"));
+        
+        return questionMapper.mapTo(updatedEntity);
+    }
+
+    @Override
+    public Integer getQuestionNumber(UUID id) {
+        return questionRepository.findById(id)
+                .map(QuestionEntity::getNumber)
+                .orElseThrow(() -> new RuntimeException("Question not found with id: " + id));
     }
 
     @Override

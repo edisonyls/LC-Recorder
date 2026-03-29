@@ -1,0 +1,48 @@
+name: Deploy React Frontend
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "client/**"
+      - ".github/workflows/react-deploy.yml"
+
+jobs:
+  deploy-frontend:
+    runs-on: [self-hosted, client]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Install dependencies
+        run: |
+          cd client
+          npm install
+
+      - name: Build application
+        working-directory: client
+        env:
+          VITE_API_ENDPOINT: ${{ secrets.VITE_API_ENDPOINT }}
+        run: npm run build
+
+      - name: Deploy to server
+        working-directory: client
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          sudo rm -rf "$DEPLOY_PATH"
+          sudo mkdir -p "$DEPLOY_PATH"
+          sudo cp -r dist/* "$DEPLOY_PATH/"
+
+          # Set proper permissions
+          sudo chown -R www-data:www-data "$DEPLOY_PATH"
+          sudo chmod -R 755 "$DEPLOY_PATH"
+
+          # Restart nginx to ensure changes take effect
+          sudo systemctl restart nginx

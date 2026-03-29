@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping(path = "api/payment")
-@CrossOrigin(origins = { "https://ylslc.org", "http://localhost:3000" })
+@CrossOrigin(origins = { "https://ylslc.edisonyls.com", "http://localhost:3000" })
 public class PaymentController {
     private final UserService userService;
     private final List<String> validRoles = Arrays.asList("REGULAR", "PREMIUM", "PREPLUS");
