@@ -18,7 +18,7 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import moment from "moment";
 import CalendarHeatmap from "react-calendar-heatmap";
 import "react-calendar-heatmap/dist/styles.css";
-import ReactTooltip from "react-tooltip";
+import { Tooltip } from "react-tooltip";
 
 const LeetCodeStats = ({ userId, stats: propsStats }) => {
   const theme = useTheme();
@@ -388,7 +388,7 @@ const LeetCodeStats = ({ userId, stats: propsStats }) => {
                     ],
                     xaxis: {
                       categories: stats.averageTimeOfCompletion.map(
-                        (item) => item.difficulty
+                        (item) => item.difficulty,
                       ),
                       labels: {
                         style: {
@@ -541,19 +541,15 @@ const LeetCodeStats = ({ userId, stats: propsStats }) => {
                     return "color-github-1";
                   }}
                   tooltipDataAttrs={(value) => ({
-                    "data-tip": value.date
+                    "data-tooltip-id": "heatmap-tooltip",
+                    "data-tooltip-content": value.date
                       ? `${value.count} questions recorded on ${moment(
-                          value.date
+                          value.date,
                         ).format("MMM Do")}`
                       : "No question recorded",
                   })}
                 />
-                <ReactTooltip
-                  place="top"
-                  type="dark"
-                  effect="solid"
-                  offset={{ top: 8 }}
-                />
+                <Tooltip id="heatmap-tooltip" place="top" />
                 <Box
                   mt={1}
                   sx={{
